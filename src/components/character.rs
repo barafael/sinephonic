@@ -10,6 +10,7 @@ fn position(valence: f64, arousal: f64) -> (f64, f64) {
 #[component]
 pub fn Character() -> Element {
     let app = use_app();
+    let chords = REFERENCES;
     // Reference dots only change with the options, not the voicing.
     let refs = use_memo(move || {
         let opts = options(
@@ -35,7 +36,13 @@ pub fn Character() -> Element {
             SectionHead { num: "05", title: "Character" }
             div { class: "tags",
                 for t in a.tags.iter().take(5) {
-                    div { class: "tag",
+                    div {
+                        class: "tag playable",
+                        title: "click to hear the notes this is about",
+                        onclick: {
+                            let idx = t.notes.clone();
+                            move |_| crate::audio::subset(app, &idx)
+                        },
                         div { class: "w", "{t.word}" }
                         div { class: "why", "{t.why}" }
                     }
@@ -60,13 +67,21 @@ pub fn Character() -> Element {
                         div { class: "va-box",
                             div { class: "va-v" }
                             div { class: "va-h" }
-                            for (label, (rx, ry)) in refs() {
-                                div { class: "ref-dot", style: "left:{rx:.1}%;top:{ry:.1}%",
+                            for (k, (label, (rx, ry))) in refs().into_iter().enumerate() {
+                                div {
+                                    class: "ref-dot playable",
+                                    style: "left:{rx:.1}%;top:{ry:.1}%",
+                                    title: "click to hear",
+                                    onclick: move |_| crate::audio::midis(app, chords[k].1),
                                     span { class: "d" }
                                     span { class: "l", "{label}" }
                                 }
                             }
-                            div { class: "va-dot", style: "left:{x:.1}%;top:{y:.1}%" }
+                            div {
+                                class: "va-dot playable",
+                                style: "left:{x:.1}%;top:{y:.1}%",
+                                onclick: move |_| crate::audio::chord(app, false),
+                            }
                         }
                         span { class: "va-label", "bright" }
                     }

@@ -10,6 +10,7 @@ mod readings;
 mod segmented;
 mod settings;
 mod spectrum;
+mod staff;
 mod voicing;
 mod waveform;
 
@@ -25,6 +26,7 @@ pub use readings::Readings;
 pub use segmented::Segmented;
 pub use settings::SettingsPanel;
 pub use spectrum::Spectrum;
+pub use staff::Staff;
 pub use voicing::Voicing;
 pub use waveform::Waveform;
 

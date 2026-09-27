@@ -2,7 +2,7 @@ use anatomy::{Model, RatioSet, Spelling};
 use dioxus::prelude::*;
 
 use super::Segmented;
-use crate::state::use_app;
+use crate::state::{use_app, Theme};
 
 /// Ratio set, reference pitch, spelling and model.
 #[component]
@@ -45,6 +45,12 @@ pub fn SettingsPanel() -> Element {
                 options: vec![(Model::Improved, "improved".to_string()), (Model::Prototype, "prototype".to_string())],
                 value: s.model,
                 onchange: move |m| app.settings.write().model = m,
+            }
+            label { "theme" }
+            Segmented {
+                options: vec![(Theme::Auto, "auto".to_string()), (Theme::Light, "light".to_string()), (Theme::Dark, "dark".to_string())],
+                value: app.theme.cloned(),
+                onchange: move |t| app.theme.set(t),
             }
             p { class: "note",
                 "Improved: spelled chord tones, Parncutt root support, Hindemith's interval roots and Stolzenburg periodicity. Prototype: the design handoff's original heuristics."

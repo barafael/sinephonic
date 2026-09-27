@@ -426,7 +426,14 @@ fn tags(
     let cross = rel.has(3) && rel.has(4);
     let b9dom = rel.has(1) && rel.has(4);
     let mut tags: Vec<Tag> = Vec::new();
-    let mut push = |word, weight, why: String| tags.push(Tag { word, weight, why });
+    let mut push = |word, weight, why: String| {
+        tags.push(Tag {
+            word,
+            weight,
+            why,
+            notes: Vec::new(),
+        })
+    };
     if cross || b9dom {
         push(
             "aggressive",
@@ -572,6 +579,7 @@ fn tags(
     }
     if tags.is_empty() && best.third == Third::Major && best.perfect_fifth {
         tags.push(Tag {
+            notes: Vec::new(),
             word: "bright",
             weight: 0.4,
             why: "Major 3rd over a pure 5th: the reference consonance of the major triad.".into(),
@@ -579,6 +587,7 @@ fn tags(
     }
     if tags.is_empty() && best.third == Third::Minor && best.perfect_fifth {
         tags.push(Tag {
+            notes: Vec::new(),
             word: "somber",
             weight: 0.4,
             why: "Minor 3rd over a pure 5th: stable, but shaded.".into(),

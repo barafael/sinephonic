@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use harmony::Midi;
 
-use super::SettingsPanel;
+use super::{SettingsPanel, Staff};
 use crate::audio;
 use crate::state::use_app;
 
@@ -27,10 +27,10 @@ pub fn Header() -> Element {
             None => ("—".to_string(), "no notes".to_string(), String::new()),
         },
     };
-    let play = move |arp: bool| {
-        if let Some(a) = app.analysis.read().as_ref() {
-            audio::play(a.freqs(app.tuning.cloned()), arp, app.timbre.cloned());
-        }
+    let play = move |arp: bool| audio::chord(app, arp);
+    let staff_names: Vec<String> = match analysis.as_ref() {
+        Some(a) => a.note_names.clone(),
+        None => notes.iter().map(|&m| Midi(m).name(spelling)).collect(),
     };
     rsx! {
         header { class: "header",
@@ -48,6 +48,9 @@ pub fn Header() -> Element {
                 }
                 div { class: "chord-name", "{name}" }
                 div { class: "muted", "{line}" }
+            }
+            div { class: "header-staff", title: "click to play",
+                Staff { names: staff_names, onclick: move |_| audio::chord(app, false) }
             }
             div { class: "header-right",
                 div { class: "summary", "{summary}" }

@@ -15,6 +15,14 @@ A one-screen chord-voicing analyser, built from the design handoff in
 - voice-leading neighbours: every chord one semitone or tone away, clickable
 - pitch-class clocks (chromatic and circle of fifths)
 
+Almost everything plays when clicked: keys, presets, readings (over their root), interval rows,
+matrix cells, tags (the notes they're about), spectrum beats, any point of the consonance
+landscape, waveform lanes, clock notes and the reference chords on the mood map. Sounding keys
+light up. The header shows the voicing on a grand staff, spelled as analysed. The page tint
+follows the chord's mood (valence, arousal), faintly, in light and dark themes. Presets are a
+random handful from a pool of about 90 voicings in all keys (**shuffle** for more). The layout
+uses the full width of large screens and becomes one long page on phones.
+
 12-TET is the default tuning; just intonation is a toggle. The voicing is kept in the URL
 fragment (`#C3,G3,Ab3,Eb4`), so you can share a chord or edit it in the address bar.
 **connect MIDI** takes input from a MIDI keyboard through Web MIDI; I haven't tested it with

@@ -3,7 +3,7 @@ use harmony::{PitchClass, Spelling};
 
 /// The chord's pitch classes on a circle: chromatic (step 1) or fifths (step 7). The polygon
 /// makes symmetry visible (dim7 is a square, aug a triangle); the root is filled, the bass
-/// ringed.
+/// ringed. Clicking a pitch class plays it (in octave 4).
 #[component]
 pub fn PcClock(
     pcs: Vec<u8>,
@@ -12,6 +12,7 @@ pub fn PcClock(
     step: u8,
     title: &'static str,
     spelling: Spelling,
+    onplay: EventHandler<u8>,
 ) -> Element {
     // viewBox units; the SVG scales to its column (see .clock svg in main.css).
     let size = 260.0;
@@ -33,11 +34,12 @@ pub fn PcClock(
         })
         .collect::<Vec<_>>()
         .join(" ");
-    let labels: Vec<(f64, f64, String, bool)> = (0..12u8)
+    let labels: Vec<(u8, f64, f64, String, bool)> = (0..12u8)
         .map(|pc| {
             let k = (pc as u32 * step as u32 % 12) as f64;
             let a = k / 12.0 * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
             (
+                pc,
                 c + (r + 24.0) * a.cos(),
                 c + (r + 24.0) * a.sin() + 5.0,
                 spelling.pc_name(PitchClass::new(pc as i32)).to_string(),
@@ -59,8 +61,15 @@ pub fn PcClock(
                 if pcs.len() > 1 {
                     polygon { class: "clock-poly", points: "{poly}" }
                 }
-                for (x, y, text, on) in labels {
-                    text { class: if on { "clock-label on" } else { "clock-label" }, x: "{x}", y: "{y}", text_anchor: "middle", "{text}" }
+                for (pc, x, y, text, on) in labels {
+                    text {
+                        class: if on { "clock-label on" } else { "clock-label" },
+                        x: "{x}",
+                        y: "{y}",
+                        text_anchor: "middle",
+                        onclick: move |_| onplay.call(pc),
+                        "{text}"
+                    }
                 }
                 for (x, y, is_root, is_bass) in dots {
                     if is_bass {

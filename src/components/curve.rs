@@ -34,6 +34,7 @@ const LANDMARKS: [(&str, f64); 11] = [
 pub fn DissonanceCurve() -> Element {
     let app = use_app();
     let mut width = use_signal(|| 1200.0f64);
+    let mut svg_el = use_signal(|| None::<std::rc::Rc<MountedData>>);
     let analysis = app.analysis.read();
     let Some(a) = analysis.as_ref() else {
         return rsx! {};
@@ -125,7 +126,7 @@ pub fn DissonanceCurve() -> Element {
         .collect();
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "07", title: "Consonance landscape", hint: format!("every interval above {}", a.note_names[0]) }
+            SectionHead { num: "07", title: "Consonance landscape", hint: format!("every interval above {} · click to hear any of them", a.note_names[0]) }
             div {
                 onresize: move |e| {
                     if let Ok(size) = e.get_content_box_size() {
@@ -134,7 +135,23 @@ pub fn DissonanceCurve() -> Element {
                         }
                     }
                 },
-                svg { class: "plot curve-plot", view_box: "0 0 {w} {HEIGHT}", height: "{HEIGHT}",
+                svg {
+                    class: "plot curve-plot playable",
+                    view_box: "0 0 {w} {HEIGHT}",
+                    height: "{HEIGHT}",
+                    onmounted: move |e| svg_el.set(Some(e.data())),
+                    // Clicking anywhere plays the bass with the interval under the pointer.
+                    onclick: move |e| {
+                        let client_x = e.client_coordinates().x;
+                        spawn(async move {
+                            let Some(el) = svg_el() else { return };
+                            if let Ok(r) = el.get_client_rect().await {
+                                let x = client_x - r.origin.x;
+                                let cents = ((x - LEFT) / (w - LEFT - RIGHT) * max_c).clamp(0.0, max_c);
+                                crate::audio::over_bass(app, cents);
+                            }
+                        });
+                    },
                     for (x, octave) in semis {
                         line { class: if octave { "grid strong" } else { "grid" }, x1: "{x}", x2: "{x}", y1: "{TOP}", y2: "{HEIGHT - BOTTOM}" }
                     }
@@ -148,10 +165,19 @@ pub fn DissonanceCurve() -> Element {
                     for (x, l) in octave_labels {
                         text { class: "label", x: "{x}", y: "{HEIGHT - BOTTOM + 28.0}", text_anchor: "middle", "{l}" }
                     }
-                    for (x, yr, yh, name, values) in marks {
+                    for (k, (x, yr, yh, name, values)) in marks.into_iter().enumerate() {
                         line { class: "marker", x1: "{x}", x2: "{x}", y1: "{TOP - 6.0}", y2: "{HEIGHT - BOTTOM}" }
                         circle { class: "he-dot", cx: "{x}", cy: "{yh}", r: "3.5" }
-                        circle { class: "curve-dot", cx: "{x}", cy: "{yr}", r: "5" }
+                        circle {
+                            class: "curve-dot",
+                            cx: "{x}",
+                            cy: "{yr}",
+                            r: "6",
+                            onclick: move |e| {
+                                e.stop_propagation();
+                                crate::audio::subset(app, &[0, k + 1]);
+                            },
+                        }
                         // Labels near the right edge hang to the left of their marker.
                         if x > w - 170.0 {
                             text { class: "label", x: "{x - 5.0}", y: "{TOP - 18.0}", text_anchor: "end", "{name}" }

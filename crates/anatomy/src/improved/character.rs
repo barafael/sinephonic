@@ -103,7 +103,14 @@ pub(crate) fn tags(
     let b9 = rel.has(1) && rel.has(4);
     let dominant = best.third == Third::Major && best.seventh == Some(Seventh::Dominant);
     let mut tags: Vec<Tag> = Vec::new();
-    let mut push = |word, weight, why: String| tags.push(Tag { word, weight, why });
+    let mut push = |word, weight, why: String| {
+        tags.push(Tag {
+            word,
+            weight,
+            why,
+            notes: Vec::new(),
+        })
+    };
 
     if cross || b9 {
         let why = if cross {
@@ -388,12 +395,39 @@ pub(crate) fn tags(
             _ => format!("{quality} triad: {} colour.", if major { "bright" } else { "shaded" }),
         };
         tags.push(Tag {
+            notes: Vec::new(),
             word,
             weight: 0.4,
             why,
         });
     }
 
+    for t in &mut tags {
+        t.notes = evidence(v, t.word, pairs);
+    }
     tags.sort_by(|a, b| b.weight.partial_cmp(&a.weight).expect("finite weights"));
     tags
+}
+
+/// The notes a tag's explanation talks about, so they can be played on their own.
+fn evidence(v: &Voicing, word: &str, pairs: &[Pair]) -> Vec<usize> {
+    let two = |a: u8, b: u8| -> Vec<usize> { v.lowest(a).into_iter().chain(v.lowest(b)).collect() };
+    let rel = v.best.rel;
+    match word {
+        "aggressive" if rel.has(3) && rel.has(4) => two(4, 3),
+        "aggressive" => two(1, 4),
+        "harsh" => two(0, 7),
+        "complex" => two(4, 8),
+        "grinding" => pairs
+            .iter()
+            .filter(|p| p.semitones == 1)
+            .max_by(|a, b| a.roughness.total_cmp(&b.roughness))
+            .map_or(Vec::new(), |p| vec![p.i, p.j]),
+        "unsettled" => std::iter::once(0).chain(v.lowest(0)).collect(),
+        "dark" => two(3, 8),
+        "lush" | "piquant" => two(11, 0),
+        "driving" => two(4, 10),
+        "luminous" => two(4, 6),
+        _ => Vec::new(),
+    }
 }

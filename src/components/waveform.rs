@@ -102,7 +102,7 @@ pub fn Waveform() -> Element {
     }
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "08", title: "Waveform" }
+            SectionHead { num: "08", title: "Waveform", hint: "click a lane to hear it".to_string() }
             div { class: "wave-top",
                 div { class: "stats",
                     for (k, v) in stats {
@@ -141,10 +141,26 @@ pub fn Waveform() -> Element {
                         line { class: "marker", x1: "{x}", x2: "{x}", y1: "{PAD - 6.0}", y2: "{h - PAD}" }
                         text { class: "mlabel", x: "{lx}", y: "{h - 8.0}", "{label}" }
                     }
-                    for (mid, label, d) in lanes {
+                    for (k, (mid, label, d)) in lanes.into_iter().enumerate() {
+                        rect {
+                            class: "hit",
+                            x: "0",
+                            y: "{mid - LANE / 2.0}",
+                            width: "{w}",
+                            height: "{LANE}",
+                            onclick: move |_| crate::audio::subset(app, &[k]),
+                        }
                         line { class: "base", x1: "{LEFT}", x2: "{w}", y1: "{mid}", y2: "{mid}" }
                         path { class: "lane", d: "{d}" }
                         text { class: "label", x: "8", y: "{mid + 3.5}", "{label}" }
+                    }
+                    rect {
+                        class: "hit",
+                        x: "0",
+                        y: "{smid - SUM_H / 2.0}",
+                        width: "{w}",
+                        height: "{SUM_H}",
+                        onclick: move |_| crate::audio::chord(app, false),
                     }
                     line { class: "sum-base", x1: "{LEFT}", x2: "{w}", y1: "{smid}", y2: "{smid}" }
                     path { class: "sum", d: "{sum_d}" }

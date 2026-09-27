@@ -41,7 +41,7 @@ pub fn Spectrum() -> Element {
             )
         })
         .collect();
-    let joins: Vec<(f64, f64, f64, String)> = hits
+    let joins: Vec<(f64, f64, f64, String, usize, usize)> = hits
         .iter()
         .map(|c| {
             let x = x_of((c.lower.freq + c.upper.freq) / 2.0);
@@ -55,6 +55,8 @@ pub fn Spectrum() -> Element {
                 base(c.upper.note) - LANE + 8.0,
                 base(c.lower.note),
                 label,
+                c.lower.note,
+                c.upper.note,
             )
         })
         .collect();
@@ -81,7 +83,7 @@ pub fn Spectrum() -> Element {
     };
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "09", title: "Spectrum", hint: "partials on the harmonic series".to_string() }
+            SectionHead { num: "09", title: "Spectrum", hint: "click a lane or a beat to hear it".to_string() }
             div {
                 onresize: move |e| {
                     if let Ok(size) = e.get_content_box_size() {
@@ -96,11 +98,27 @@ pub fn Spectrum() -> Element {
                         text { class: "mlabel", x: "{x + 3.0}", y: "{h - 10.0}", "{l}" }
                     }
                     for i in 0..n {
+                        rect {
+                            class: "hit",
+                            x: "0",
+                            y: "{base(i) - LANE + 6.0}",
+                            width: "{w}",
+                            height: "{LANE}",
+                            onclick: move |_| crate::audio::subset(app, &[i]),
+                        }
                         line { class: "base", x1: "{LEFT}", x2: "{w}", y1: "{base(i)}", y2: "{base(i)}" }
                     }
-                    for (x, y1, y2, label) in joins {
-                        line { class: "join", x1: "{x}", x2: "{x}", y1: "{y1}", y2: "{y2}" }
-                        text { class: "jlabel", x: "{x + 3.0}", y: "{y1 + 2.0}", "{label}" }
+                    for (x, y1, y2, label, lo_note, up_note) in joins {
+                        g {
+                            class: "join-group",
+                            onclick: move |e| {
+                                e.stop_propagation();
+                                crate::audio::subset(app, &[lo_note, up_note]);
+                            },
+                            line { class: "join-hit", x1: "{x}", x2: "{x}", y1: "{y1}", y2: "{y2}" }
+                            line { class: "join", x1: "{x}", x2: "{x}", y1: "{y1}", y2: "{y2}" }
+                            text { class: "jlabel", x: "{x + 3.0}", y: "{y1 + 2.0}", "{label}" }
+                        }
                     }
                     for (x, y1, y2) in ticks {
                         line { class: "partial", x1: "{x}", x2: "{x}", y1: "{y1}", y2: "{y2}" }

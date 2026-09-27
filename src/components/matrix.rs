@@ -5,6 +5,8 @@ use super::{SectionHead, Segmented};
 use crate::state::use_app;
 
 struct Cell {
+    /// Notes played on click.
+    play: Vec<usize>,
     top: String,
     sub: String,
     bg: String,
@@ -15,6 +17,7 @@ struct Cell {
 impl Cell {
     fn plain(top: String, bg: &str, fg: &'static str, size: &'static str) -> Self {
         Self {
+            play: Vec::new(),
             top,
             sub: String::new(),
             bg: bg.to_string(),
@@ -33,37 +36,44 @@ pub fn InterRelations() -> Element {
     };
     let set = app.settings.read().ratio_set;
     let n = a.notes.len();
-    let mut cells = vec![Cell::plain(String::new(), "transparent", "#1d1b18", "13px")];
-    for name in &a.note_names {
-        cells.push(Cell::plain(name.clone(), "transparent", "#1d1b18", "13px"));
+    let mut cells = vec![Cell::plain(
+        String::new(),
+        "transparent",
+        "var(--ink)",
+        "13px",
+    )];
+    for (i, name) in a.note_names.iter().enumerate() {
+        let mut c = Cell::plain(name.clone(), "transparent", "var(--ink)", "13px");
+        c.play = vec![i];
+        cells.push(c);
     }
     for i in 0..n {
-        cells.push(Cell::plain(
-            a.note_names[i].clone(),
-            "#ebe6dc",
-            "#1d1b18",
-            "13px",
-        ));
+        let mut head = Cell::plain(a.note_names[i].clone(), "var(--sel)", "var(--ink)", "13px");
+        head.play = vec![i];
+        cells.push(head);
         for j in 0..n {
             cells.push(if i == j {
-                Cell::plain("·".into(), "#ece8e0", "#9a9488", "13px")
+                Cell::plain("·".into(), "var(--diag)", "var(--muted-2)", "13px")
             } else if j > i {
                 let p = a.pair(i, j).expect("pair exists");
                 let r = p.roughness;
                 Cell {
+                    play: vec![i, j],
                     top: interval_name(p.semitones),
                     sub: format!("r {r:.2}"),
-                    bg: format!("oklch({:.3} {:.3} 35)", 0.97 - 0.35 * r, 0.02 + 0.12 * r),
-                    fg: if r > 0.55 { "#fff" } else { "#1d1b18" },
+                    // The colour ramp lives in CSS (.cell.rough) so it can follow the theme.
+                    bg: format!("--r:{r:.3}"),
+                    fg: if r > 0.55 { "hot" } else { "" },
                     size: "15px",
                 }
             } else {
                 let mut c = Cell::plain(
                     set.ratio((a.notes[i] - a.notes[j]) as u32).to_string(),
                     "transparent",
-                    "#6b665e",
+                    "var(--muted)",
                     "12px",
                 );
+                c.play = vec![j, i];
                 if let Some(b) = a
                     .beats
                     .iter()
@@ -97,8 +107,22 @@ pub fn InterRelations() -> Element {
             }
             div { class: "scroll-x",
                 div { class: "matrix", style: "grid-template-columns:56px repeat({n},minmax(0,96px))",
-                    for c in cells {
-                        div { class: "cell", style: "background:{c.bg};color:{c.fg}",
+                    // Keyed by size and position: a cell's kind (header, rough, ratio) depends
+                    // only on those, so a new size gets fresh elements instead of patched styles.
+                    for (k, c) in cells.into_iter().enumerate() {
+                        div {
+                            key: "{n}-{k}",
+                            class: if c.bg.starts_with("--r") { format!("cell playable rough {}", c.fg) } else if c.play.is_empty() { "cell".to_string() } else { "cell playable".to_string() },
+                            // Every cell sets both properties so no stale inline style survives a re-render.
+                            style: if c.bg.starts_with("--r") { format!("{};background:var(--ramp);color:var(--ramp-fg)", c.bg) } else { format!("background:{};color:{}", c.bg, c.fg) },
+                            onclick: {
+                                let idx = c.play.clone();
+                                move |_| {
+                                    if !idx.is_empty() {
+                                        crate::audio::subset(app, &idx);
+                                    }
+                                }
+                            },
                             span { class: "t", style: "font-size:{c.size}", "{c.top}" }
                             span { class: "s", "{c.sub}" }
                         }

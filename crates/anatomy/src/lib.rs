@@ -167,6 +167,8 @@ pub struct Tag {
     pub word: &'static str,
     pub weight: f64,
     pub why: String,
+    /// Indices of the notes the explanation is about (empty: the whole chord).
+    pub notes: Vec<usize>,
 }
 
 /// Metrics only the improved model computes.

@@ -36,7 +36,10 @@ pub fn Readings() -> Element {
                         class: if r.root == selected { "reading on" } else { "reading" },
                         onclick: {
                             let root = r.root;
-                            move |_| app.selected_root.set(Some(root))
+                            move |_| {
+                                app.selected_root.set(Some(root));
+                                crate::audio::as_reading(app, root);
+                            }
                         },
                         div { class: "reading-name", "{r.symbol}" }
                         div { class: "prob",
@@ -59,17 +62,17 @@ pub fn Readings() -> Element {
                 }
             }
             div { class: "identity-row",
-                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 1, title: "chromatic", spelling }
-                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 7, title: "fifths", spelling }
+                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 1, title: "chromatic", spelling, onplay: move |pc: u8| crate::audio::midis(app, &[60 + pc]) }
+                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 7, title: "fifths", spelling, onplay: move |pc: u8| crate::audio::midis(app, &[60 + pc]) }
                 if let Some(line) = identity {
                     p { class: "identity", "{line}" }
                 }
             }
             p { class: "footnote",
                 if a.extras.is_some() {
-                    "Each of the 12 pitch classes is tried as root. Fit rises when the root is present or in the bass, when a clear 3rd, 5th and 7th exist, with psychoacoustic root support (Parncutt) and when the root is the root of the voicing's strongest interval (Hindemith); it falls with alterations, a missing 3rd or a missing root. Click a reading to relabel the intervals."
+                    "Each of the 12 pitch classes is tried as root. Fit rises when the root is present or in the bass, when a clear 3rd, 5th and 7th exist, with psychoacoustic root support (Parncutt) and when the root is the root of the voicing's strongest interval (Hindemith); it falls with alterations, a missing 3rd or a missing root. Click a reading to relabel the intervals and hear it over its root."
                 } else {
-                    "Each of the 12 pitch classes is tried as root. Fit rises when the root is present or in the bass and a clear 3rd, 5th and 7th exist; it falls with alterations, a missing 3rd or a missing root. Click a reading to relabel the intervals."
+                    "Each of the 12 pitch classes is tried as root. Fit rises when the root is present or in the bass and a clear 3rd, 5th and 7th exist; it falls with alterations, a missing 3rd or a missing root. Click a reading to relabel the intervals and hear it over its root."
                 }
             }
         }

@@ -31,6 +31,7 @@ pub fn Intervals() -> Element {
             let d = a.notes[i] - a.notes[0];
             let pc = PitchClass::of_midi(a.notes[i]);
             (
+                i,
                 a.note_names[i].clone(),
                 sel.degree_of(pc).map_or("", |d| d.label()),
                 if i == 0 {
@@ -60,13 +61,19 @@ pub fn Intervals() -> Element {
                     div { class: "th r", "Just" }
                     div { class: "th r", "TET−just" }
                     div { class: "th r", "Hz" }
-                    for (note, deg, iv, st, ratio, c, hz) in rows {
-                        div { class: "td note", span { class: "dot dot-lg" } "{note}" }
-                        div { class: "td deg", "{deg}" }
-                        div { class: "td", "{iv}" span { class: "muted", " · {st}" } }
-                        div { class: "td r", "{ratio}" }
-                        div { class: "td r muted", "{c}" }
-                        div { class: "td r", "{hz}" }
+                    for (i, note, deg, iv, st, ratio, c, hz) in rows {
+                        // A row plays its note with the bass (the bass row plays alone).
+                        div {
+                            class: "iv-row",
+                            title: "click to hear with the bass",
+                            onclick: move |_| crate::audio::subset(app, &if i == 0 { vec![0] } else { vec![0, i] }),
+                            div { class: "td note", span { class: "dot dot-lg" } "{note}" }
+                            div { class: "td deg", "{deg}" }
+                            div { class: "td", "{iv}" span { class: "muted", " · {st}" } }
+                            div { class: "td r", "{ratio}" }
+                            div { class: "td r muted", "{c}" }
+                            div { class: "td r", "{hz}" }
+                        }
                     }
                 }
             }

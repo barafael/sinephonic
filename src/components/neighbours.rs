@@ -34,7 +34,7 @@ pub fn Neighbours() -> Element {
         .collect();
     rsx! {
         section { class: "section",
-            SectionHead { num: "10", title: "Neighbours", hint: "move one note · click to go there".to_string() }
+            SectionHead { num: "10", title: "Neighbours", hint: "move one note · click to go there and hear it".to_string() }
             div { class: "scroll-x",
                 div { class: "nb-table",
                     div { class: "th", "Note" }
@@ -54,7 +54,10 @@ pub fn Neighbours() -> Element {
                                         button {
                                             class: "nb-cell",
                                             title: "{arrow} ({n.tension:.2})",
-                                            onclick: move |_| app.set_notes(notes.iter().copied()),
+                                            onclick: move |_| {
+                                                app.set_notes(notes.iter().copied());
+                                                crate::audio::chord(app, false);
+                                            },
                                             span { class: "nb-sym", "{n.symbol}" }
                                             span { class: "nb-bar",
                                                 span { class: "nb-fill", style: "width:{n.tension * 100.0:.0}%" }

@@ -6,18 +6,6 @@ use harmony::midi::{format_notes, normalize, parse_notes};
 
 pub const DEFAULT_NOTES: [u8; 4] = [48, 55, 56, 63];
 
-pub const PRESETS: [(&str, &[u8]); 9] = [
-    ("C–G–A♭–E♭", &[48, 55, 56, 63]),
-    ("C7♯9", &[48, 52, 55, 58, 63]),
-    ("C7♯9♯5", &[48, 52, 56, 58, 63]),
-    ("Cmaj7", &[48, 52, 55, 59]),
-    ("C major", &[48, 52, 55]),
-    ("C minor", &[48, 51, 55]),
-    ("C7♭9", &[48, 52, 55, 58, 61]),
-    ("Quartal", &[50, 55, 60, 65]),
-    ("Cluster", &[60, 61, 62]),
-];
-
 /// Reference chords on the valence × arousal map.
 pub const REFERENCES: [(&str, &[u8]); 8] = [
     ("maj", &[48, 52, 55]),
@@ -61,6 +49,31 @@ pub struct AppState {
     pub window_periods: Signal<u32>,
     pub settings: Signal<Settings>,
     pub analysis: Memo<Option<Analysis>>,
+    /// MIDI notes currently sounding (lit on the keyboard).
+    pub sounding: Signal<Vec<u8>>,
+    /// Incremented per sound so only the latest one clears the highlight.
+    pub sound_token: Signal<u64>,
+    pub theme: Signal<Theme>,
+    /// Chooses which presets are on show; re-rolled by "shuffle".
+    pub preset_seed: Signal<u64>,
+}
+
+/// Colour scheme: follow the system, or force light or dark.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Theme {
+    Auto,
+    Light,
+    Dark,
+}
+
+impl Theme {
+    pub fn attr(self) -> &'static str {
+        match self {
+            Theme::Auto => "auto",
+            Theme::Light => "light",
+            Theme::Dark => "dark",
+        }
+    }
 }
 
 impl AppState {
@@ -79,6 +92,10 @@ impl AppState {
             timbre,
             window_periods: use_signal(|| 2),
             settings,
+            sounding: use_signal(Vec::new),
+            sound_token: use_signal(|| 0),
+            theme: use_signal(|| Theme::Auto),
+            preset_seed: use_signal(|| 1),
             analysis: use_memo(move || {
                 let opts = options(&settings(), tuning(), timbre());
                 anatomy::analyze(&notes.read(), &opts)
