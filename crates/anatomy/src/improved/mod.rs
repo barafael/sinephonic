@@ -22,12 +22,11 @@ use harmony::ratio::{gradus, lcm};
 use harmony::{Midi, PcSet, PitchClass};
 
 use crate::periodicity::{beats, smoothed_log_periodicity, Periodicity};
-use crate::reference::{harshness, BRIGHT};
+use crate::reference::harshness;
 use crate::{clamp01, distinct_pcs, max_partial, Analysis, Axes, Extras, Options};
 use character::{position, Position, Voicing};
 
 pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
-    let n = notes.len();
     let bass_pc = PitchClass::of_midi(notes[0]);
     let pcs = distinct_pcs(notes);
     let set = PcSet::from_midi(notes);
@@ -57,17 +56,7 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
     };
     // Replaced below by the information-theoretic composite; arousal is updated with it.
     let complexity = 0.0;
-    let (mut br, mut c) = (0.0, 0);
-    for &pc in &pcs {
-        let ic = best.root.up_to(pc);
-        if ic != 0 {
-            br += BRIGHT[ic as usize];
-            c += 1;
-        }
-    }
-    let br = if c > 0 { br / c as f64 } else { 0.0 };
-    let reg = (notes.iter().map(|&m| m as f64).sum::<f64>() / n as f64 - 60.0) / 24.0;
-    let brightness = clamp01(0.5 + br / 2.4 + reg * 0.25);
+    let brightness = brightness(notes, best);
     // A six-four or a 7th in the bass is traditionally unstable.
     let unsettled = matches!(
         position(&Voicing {
@@ -77,23 +66,27 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         }),
         Position::Second | Position::Third
     );
-    let stability = clamp01(
+    // Structural stability: the chord's frame, independent of how rough it sounds.
+    let structure = clamp01(
         0.3 + if fifth_frame { 0.25 } else { 0.0 }
             + if best.root == bass_pc { 0.2 } else { 0.0 }
             + if best.root_present { 0.1 } else { 0.0 }
-            - 0.35 * tension
-            - 0.15 * ambiguity
             - if unsettled { 0.1 } else { 0.0 }
             + if p.bass_cycles <= 6 { 0.15 } else { 0.0 },
     );
+    let stability = clamp01(structure - 0.35 * tension - 0.15 * ambiguity);
     let aggression = clamp01(
         0.45 * if cross { 1.0 } else { 0.0 }
             + 0.3 * harsh
             + 0.25 * tension
             + if b9dom { 0.25 } else { 0.0 },
     );
-    let valence = clamp01(brightness * 0.6 + stability * 0.4 - 0.25 * harsh);
-    let arousal = clamp01(0.5 * tension + 0.3 * aggression + 0.2 * complexity);
+    // Valence and arousal are kept apart: valence from colour (brightness) and structure,
+    // arousal from tension, aggression, complexity and structural instability. The prototype
+    // subtracted harshness and tension from valence, which left "bright but tense" (Lydian,
+    // ♯11 dominants) almost empty.
+    let valence = clamp01(brightness + 0.1 * (structure - 0.6) - 0.1 * (harsh - 0.3));
+    let arousal = mood_arousal(tension, aggression, complexity, structure);
 
     let support = metrics::parncutt_support(set);
     let freqs = match opts.tuning {
@@ -164,7 +157,12 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
     };
     let info = crate::information::measure(&a, opts.tuning, opts.timbre, smoothed);
     a.axes.complexity = info.complexity;
-    a.arousal = clamp01(0.5 * a.axes.tension + 0.3 * a.axes.aggression + 0.2 * info.complexity);
+    a.arousal = mood_arousal(
+        a.axes.tension,
+        a.axes.aggression,
+        info.complexity,
+        structure,
+    );
     a.information = Some(info);
     a
 }
@@ -187,4 +185,42 @@ fn excess_pairs(notes: &[u8], p: &Periodicity, opts: &Options) -> Vec<crate::Pai
         }
     }
     out
+}
+
+fn mood_arousal(tension: f64, aggression: f64, complexity: f64, structure: f64) -> f64 {
+    // Scaled so the calmest consonances sit near 0.25 and dense dissonances reach the top.
+    clamp01(
+        1.15 * (0.45 * tension + 0.2 * aggression + 0.2 * complexity + 0.15 * (1.0 - structure)),
+    )
+}
+
+/// Position of a chord degree on the line of fifths relative to the root, clamped to ±6:
+/// the same axis that orders the modes from Locrian (dark) to Lydian (bright). A ♯9 counts as
+/// its blue-note ♭3; a ♯5 sits halfway between its sharp spelling (+8) and ♭6 (−4), since
+/// the augmented triad it belongs to is symmetric.
+fn fifths(d: crate::Degree) -> f64 {
+    match d {
+        crate::Degree::SharpNine => -3.0,
+        crate::Degree::SharpFifth => 2.0,
+        d => d.interval().fifths().clamp(-6, 6) as f64,
+    }
+}
+
+/// Brightness: the mean line-of-fifths position of the chord tones above the root (Lydian
+/// ♯11 +6, major 3rd +4, minor 3rd −3, ♭5 −6), plus a register term.
+pub fn brightness(notes: &[u8], best: &crate::Reading) -> f64 {
+    let tones: Vec<f64> = distinct_pcs(notes)
+        .into_iter()
+        .filter_map(|pc| best.degree_of(pc))
+        .filter(|&d| d != crate::Degree::Root)
+        .map(fifths)
+        .collect();
+    let colour = if tones.is_empty() {
+        0.0
+    } else {
+        tones.iter().sum::<f64>() / tones.len() as f64 / 6.0
+    };
+    let register =
+        (notes.iter().map(|&m| m as f64).sum::<f64>() / notes.len() as f64 - 60.0) / 24.0;
+    clamp01(0.5 + 0.5 * colour + 0.15 * register)
 }

@@ -60,6 +60,7 @@ It has two models with one output type:
   - root scores combining template fit with Parncutt's root support, the bass, Hindemith's interval roots and a dominant-chord prior
   - complexity from Stolzenburg's smoothed periodicity
   - roughness measured as the excess over the unison baseline, and tension that doesn't saturate (Huron dissonance plus mean roughness)
+  - brightness from the chord tones' line-of-fifths positions (the axis that orders the modes from Locrian to Lydian); valence and arousal computed independently, so all four mood quadrants are populated (`cargo run -p anatomy --example quadrants`)
   - tag explanations checked against the voicing: inversion, tritone direction, register and tuning (`tests/claims.rs`)
   - set class, named sonorities, Huron consonance and Cook–Fujisawa tension and modality
   - *symmetric* and *bittersweet* tags

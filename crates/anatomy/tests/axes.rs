@@ -43,3 +43,59 @@ fn six_four_is_less_stable_but_not_zero() {
         .stability;
     assert!(six_four < root && six_four > 0.05, "{six_four} {root}");
 }
+
+/// Quadrant of the valence × arousal map: (bright, tense).
+fn quadrant(notes: &[u8]) -> (bool, bool) {
+    let a = analyze(notes, &Options::default()).unwrap();
+    (a.valence >= 0.5, a.arousal >= 0.5)
+}
+
+#[test]
+fn every_mood_quadrant_has_its_chords() {
+    assert_eq!(
+        quadrant(&[60, 64, 67]),
+        (true, false),
+        "major triad: bright, calm"
+    );
+    assert_eq!(
+        quadrant(&[48, 51, 55]),
+        (false, false),
+        "minor triad: dark, calm"
+    );
+    assert_eq!(
+        quadrant(&[48, 52, 59, 66, 67]),
+        (true, true),
+        "maj7♯11: bright, tense"
+    );
+    assert_eq!(
+        quadrant(&[48, 52, 58, 62, 66, 69]),
+        (true, true),
+        "13♯11: bright, tense"
+    );
+    assert_eq!(
+        quadrant(&[48, 51, 54, 57]),
+        (false, true),
+        "dim7: dark, tense"
+    );
+    assert_eq!(
+        quadrant(&[36, 40, 46, 49]),
+        (false, true),
+        "low 7♭9: dark, tense"
+    );
+}
+
+#[test]
+fn the_corpus_fills_all_four_quadrants() {
+    let entries = anatomy::corpus::parse(include_str!("corpus.txt")).unwrap();
+    let mut counts = [0usize; 4];
+    for e in &entries {
+        let (b, t) = quadrant(&e.notes);
+        counts[b as usize + 2 * t as usize] += 1;
+    }
+    for c in counts {
+        assert!(
+            c * 100 >= entries.len() * 12,
+            "each quadrant holds at least 12%: {counts:?}"
+        );
+    }
+}

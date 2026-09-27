@@ -3,8 +3,11 @@ use dioxus::prelude::*;
 use super::SectionHead;
 use crate::state::{options, use_app, REFERENCES};
 
+/// Map position in percent. Most chords score between 0.25 and 0.8, so the display stretches
+/// around the centre lines (gain 1.6) to separate them; the bars show the true values.
 fn position(valence: f64, arousal: f64) -> (f64, f64) {
-    (8.0 + valence * 84.0, 92.0 - arousal * 84.0)
+    let stretch = |v: f64| (50.0 + (v - 0.5) * 1.6 * 84.0).clamp(6.0, 94.0);
+    (stretch(valence), 100.0 - stretch(arousal))
 }
 
 #[component]
@@ -61,12 +64,14 @@ pub fn Character() -> Element {
                     }
                 }
                 div { class: "va",
-                    span { class: "va-label", "tense" }
                     div { class: "va-mid",
-                        span { class: "va-label", "dark" }
                         div { class: "va-box",
                             div { class: "va-v" }
                             div { class: "va-h" }
+                            span { class: "va-label in tl", "dark · tense" }
+                            span { class: "va-label in tr", "bright · tense" }
+                            span { class: "va-label in bl", "dark · calm" }
+                            span { class: "va-label in br", "bright · calm" }
                             for (k, (label, (rx, ry))) in refs().into_iter().enumerate() {
                                 div {
                                     class: "ref-dot playable",
@@ -83,9 +88,7 @@ pub fn Character() -> Element {
                                 onclick: move |_| crate::audio::chord(app, false),
                             }
                         }
-                        span { class: "va-label", "bright" }
                     }
-                    span { class: "va-label", "calm" }
                 }
             }
         }

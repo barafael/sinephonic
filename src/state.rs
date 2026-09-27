@@ -7,13 +7,18 @@ use harmony::midi::{format_notes, normalize, parse_notes};
 pub const DEFAULT_NOTES: [u8; 4] = [48, 55, 56, 63];
 
 /// Reference chords on the valence × arousal map.
-pub const REFERENCES: [(&str, &[u8]); 8] = [
+/// Reference chords on the valence × arousal map, a few per quadrant.
+pub const REFERENCES: [(&str, &[u8]); 12] = [
     ("maj", &[48, 52, 55]),
     ("min", &[48, 51, 55]),
     ("maj7", &[48, 52, 55, 59]),
+    ("m9", &[48, 51, 55, 58, 62]),
+    ("aug", &[48, 52, 56]),
+    ("maj7♯11", &[48, 52, 59, 66, 67]),
+    ("13♯11", &[48, 52, 58, 62, 66, 69]),
     ("7♯9", &[48, 52, 55, 58, 63]),
-    ("7♯9♯5", &[48, 52, 56, 58, 63]),
     ("dim7", &[48, 51, 54, 57]),
+    ("7♭9", &[36, 40, 46, 49]),
     ("cluster", &[60, 61, 62]),
     ("quartal", &[50, 55, 60, 65]),
 ];

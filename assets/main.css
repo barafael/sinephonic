@@ -192,7 +192,7 @@ button { font: inherit; cursor: pointer; }
 .va { display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .va-mid { display: flex; align-items: center; gap: 6px; width: 100%; justify-content: center; }
 .va-label { font-size: 11px; color: var(--muted); }
-.va-box { position: relative; flex: 0 1 220px; aspect-ratio: 1; border: 1px solid var(--ink); background: var(--paper-hi); }
+.va-box { position: relative; flex: 1 1 auto; max-width: 340px; width: 100%; aspect-ratio: 1; border: 1px solid var(--ink); background: var(--paper-hi); }
 .va-v { position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed var(--line); }
 .va-h { position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed var(--line); }
 .ref-dot { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 1px; }
@@ -431,3 +431,9 @@ body { background: var(--paper); color: var(--ink); transition: background-color
 .bar-count { font-size: 11px; font-variant-numeric: tabular-nums; }
 
 .readings + .ps-chart .bars { height: 200px; }
+
+.va-label.in { position: absolute; font-size: 10px; color: var(--muted-2); pointer-events: none; }
+.va-label.tl { top: 4px; left: 6px; }
+.va-label.tr { top: 4px; right: 6px; }
+.va-label.bl { bottom: 4px; left: 6px; }
+.va-label.br { bottom: 4px; right: 6px; }
