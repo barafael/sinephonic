@@ -65,6 +65,12 @@ pub struct Coincidence {
     pub beat: f64,
 }
 
+impl Coincidence {
+    pub fn harmonic(&self) -> u64 {
+        self.lower.harmonic
+    }
+}
+
 /// Every partial of every note, and the partials that coincide in just intonation. In 12-TET
 /// the coincidences separate and beat; this is how temperament shows up in the sound.
 pub fn spectrum(a: &Analysis, tuning: Tuning, timbre: Timbre) -> (Vec<Partial>, Vec<Coincidence>) {
@@ -171,11 +177,5 @@ mod tests {
         assert!(at(702) < at(650) && at(702) < at(750));
         assert!(at(100) > at(702));
         assert!(at(0) < 1e-9, "{}", at(0));
-    }
-}
-
-impl Coincidence {
-    pub fn harmonic(&self) -> u64 {
-        self.lower.harmonic
     }
 }
