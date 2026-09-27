@@ -79,6 +79,21 @@ cargo run -p anatomy-cli -- corpus                   # judge the corpus
 
 The desktop build (`dx serve --platform desktop`) needs webkit2gtk-4.1.
 
+## Deploying to Fly.io
+
+The app is static: `dx bundle --platform web --release` writes HTML, JS and WebAssembly to
+`target/dx/sinephonic/release/web/public`. The `Dockerfile` builds that bundle and serves it
+with nginx on port 8080 (`deploy/nginx.conf`: hashed assets cached for a year, `index.html`
+always revalidated, `.wasm` served as `application/wasm`).
+
+```sh
+fly auth login
+fly launch --no-deploy      # first time: pick a unique app name and region; keeps fly.toml
+fly deploy                  # builds on Fly's remote builder, no local Docker needed
+```
+
+`fly.toml` scales to zero when idle (`auto_stop_machines`) and starts on the next request.
+
 ## Adding voicings to the corpus
 
 Each line of `crates/anatomy/tests/corpus.txt` is one voicing:
