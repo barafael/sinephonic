@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use super::{strip_octave, SectionHead};
+use super::{strip_octave, PcClock, SectionHead};
 use crate::state::use_app;
 
 #[component]
@@ -12,6 +12,8 @@ pub fn Readings() -> Element {
     };
     let selected = app.selected_root.cloned().unwrap_or(a.best().root);
     let top = a.readings[0].prob;
+    let pcs: Vec<u8> = a.pcs.iter().map(|p| p.value()).collect();
+    let spelling = app.settings.read().spelling;
     let bass_name = strip_octave(&a.note_names[0]).to_string();
     let identity = a.extras.as_ref().map(|x| {
         let iv: String = x.interval_vector.iter().map(u8::to_string).collect();
@@ -56,8 +58,12 @@ pub fn Readings() -> Element {
                     }
                 }
             }
-            if let Some(line) = identity {
-                p { class: "identity", "{line}" }
+            div { class: "identity-row",
+                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 1, title: "chromatic", spelling }
+                PcClock { pcs: pcs.clone(), root: selected.value(), bass: a.bass_pc.value(), step: 7, title: "fifths", spelling }
+                if let Some(line) = identity {
+                    p { class: "identity", "{line}" }
+                }
             }
             p { class: "footnote",
                 if a.extras.is_some() {

@@ -11,6 +11,7 @@
 
 pub mod corpus;
 pub mod degree;
+pub mod explore;
 pub mod improved;
 pub mod periodicity;
 pub mod reference;

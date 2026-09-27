@@ -9,6 +9,15 @@ A one-screen chord-voicing analyser, built from the design handoff in
 - pairwise roughness
 - character tags and axes on a valence × arousal map
 - each note's waveform and the summed waveform, with playback
+- the partial spectrum on the chord's harmonic series, with 12-TET beat rates
+- Sethares' dissonance curve over the bass, with the voicing's intervals marked
+- voice-leading neighbours: every chord one semitone or tone away, clickable
+- pitch-class clocks (chromatic and circle of fifths)
+
+12-TET is the default tuning; just intonation is a toggle. The voicing is kept in the URL
+fragment (`#C3,G3,Ab3,Eb4`), so you can share a chord or edit it in the address bar.
+**connect MIDI** takes input from a MIDI keyboard through Web MIDI; I haven't tested it with
+hardware.
 
 ## Layout
 
@@ -41,6 +50,8 @@ It has two models with one output type:
   - Harte labels
   - root scores combining template fit with Parncutt's root support, the bass, Hindemith's interval roots and a dominant-chord prior
   - complexity from Stolzenburg's smoothed periodicity
+  - roughness measured as the excess over the unison baseline, and tension that doesn't saturate (Huron dissonance plus mean roughness)
+  - tag explanations checked against the voicing: inversion, tritone direction, register and tuning (`tests/claims.rs`)
   - set class, named sonorities, Huron consonance and Cook–Fujisawa tension and modality
   - *symmetric* and *bittersweet* tags
 

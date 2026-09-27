@@ -5260,6 +5260,7 @@ dependencies = [
  "anatomy",
  "dioxus",
  "harmony",
+ "serde_json",
 ]
 
 [[package]]

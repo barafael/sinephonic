@@ -217,3 +217,49 @@ button { font: inherit; cursor: pointer; }
 .plot .mlabel { fill: var(--muted); }
 .wave-caption { margin: 0; color: var(--muted); max-width: 80ch; text-wrap: pretty; }
 .settings .segmented { justify-self: start; }
+
+/* Dissonance curve */
+.curve-head { display: flex; justify-content: space-between; font-size: 11px; margin-top: 8px; }
+.curve { width: 100%; height: auto; display: block; background: var(--paper-hi); border: 1px solid var(--line); }
+.curve text, .plot text { font-family: var(--mono); font-size: 10px; }
+.curve .curve-line { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.curve .curve-dot { fill: var(--accent); stroke: var(--paper); stroke-width: 1.5; }
+.curve .marker, .plot .marker { stroke: rgba(29, 27, 24, .4); stroke-dasharray: 3 4; stroke-width: 1; }
+.curve .base { stroke: var(--line); }
+.curve .mlabel { fill: var(--muted); }
+.grid { stroke: var(--line-2); stroke-width: 1; }
+
+/* Spectrum */
+.plot .partial { stroke: var(--ink); stroke-width: 2; }
+.plot .join { stroke: var(--accent); stroke-width: 1.2; stroke-dasharray: 2 2; }
+.plot .jlabel { fill: var(--accent); font-size: 9px; }
+
+/* Neighbours */
+.nb-table { min-width: 620px; display: grid; grid-template-columns: 84px repeat(4, minmax(0, 1fr)); gap: 2px; }
+.nb-table .th { padding: 6px 0; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--ink); }
+.nb-table .th.c { text-align: center; }
+.nb-table .note { display: flex; align-items: center; gap: 8px; padding: 10px 0; }
+.nb-cell { display: flex; flex-direction: column; gap: 4px; align-items: stretch; text-align: left; padding: 8px 10px; border: none; background: transparent; border-radius: 2px; color: var(--ink); }
+.nb-cell:hover { background: var(--sel); }
+.nb-cell.empty-cell { color: var(--muted-2); justify-content: center; }
+.nb-sym { font-family: var(--serif); font-size: 19px; line-height: 1.1; }
+.nb-bar { height: 3px; background: var(--line-2); display: block; }
+.nb-fill { height: 100%; background: var(--ink); display: block; }
+.nb-delta { font-size: 10px; color: var(--muted); }
+
+.black-key { display: flex; align-items: flex-end; justify-content: center; }
+.black-key .klabel { font-size: 8px; color: #fff; padding-bottom: 4px; letter-spacing: -.02em; white-space: nowrap; }
+
+/* Pitch-class clocks */
+.identity-row { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.identity-row .identity { flex: 1 1 200px; }
+.clock { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.clock figcaption { font-size: 10px; color: var(--muted); }
+.clock-ring { fill: none; stroke: var(--line); }
+.clock-poly { fill: color-mix(in oklch, var(--accent) 12%, transparent); stroke: var(--accent); stroke-width: 1.2; }
+.clock-label { font-family: var(--mono); font-size: 9px; fill: var(--muted-2); }
+.clock-label.on { fill: var(--ink); font-weight: 500; }
+.clock-dot { fill: var(--ink); }
+.clock-dot.root { fill: var(--accent); }
+.clock-bass { fill: none; stroke: var(--ink); stroke-width: 1; }
+.midi-status { font-size: 12px; color: var(--muted); padding: 6px 4px; }

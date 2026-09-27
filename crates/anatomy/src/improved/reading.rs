@@ -226,6 +226,20 @@ impl Structure {
         if self.rel.len() == 1 {
             return String::new(); // octaves of one pitch class
         }
+        // A bare fifth with only alterations added: C5(♯11), not C(♯11)(no3).
+        if self.third == Third::None
+            && self.fifth == Fifth::Perfect
+            && self.seventh.is_none()
+            && self.naturals.is_empty()
+            && !self.alterations.is_empty()
+        {
+            let alts: Vec<&str> = self
+                .alterations
+                .iter()
+                .map(|&d| alteration_label(d))
+                .collect();
+            return format!("5({})", alts.join(","));
+        }
         let hi = self.top_extension();
         let mut s = String::new();
         let mut paren: Vec<String> = Vec::new();
@@ -621,6 +635,8 @@ mod tests {
             (&[0, 4, 6, 11], "maj7♯11"),
             (&[0, 3, 7, 8], "m(♭6)"),
             (&[0, 7], "5"),
+            (&[0, 6, 7], "5(♯11)"),
+            (&[0, 1, 7], "5(♭9)"),
             (&[0, 7, 10], "7(no3)"),
             (&[0, 3, 6, 10, 2], "ø9"),
             (&[0, 3, 6, 9, 2], "°7(9)"),

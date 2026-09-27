@@ -1,3 +1,4 @@
+use anatomy::explore::dissonance_curve;
 use anatomy::{interval_name, Timbre};
 use dioxus::prelude::*;
 
@@ -75,6 +76,46 @@ pub fn InterRelations() -> Element {
             });
         }
     }
+    // Dissonance curve over the bass, with the voicing's intervals marked.
+    let timbre = app.timbre.cloned();
+    let fr = a.freqs(app.tuning.cloned());
+    let span = 1200.0 * (fr[n - 1] / fr[0]).log2();
+    let max_c = if span <= 1250.0 {
+        1250.0
+    } else {
+        (span + 100.0).min(3700.0)
+    };
+    let curve = dissonance_curve(fr[0], timbre, app.settings.read().a4, max_c, 600);
+    let peak = curve.iter().map(|c| c.1).fold(0.0, f64::max).max(0.4);
+    let (cw, ch, top, bottom) = (600.0, 150.0, 10.0, 22.0);
+    let cx = |c: f64| 6.0 + c / max_c * (cw - 12.0);
+    let cy = |r: f64| top + (1.0 - (r / peak).min(1.0)) * (ch - top - bottom);
+    let curve_d: String = curve
+        .iter()
+        .enumerate()
+        .map(|(k, &(c, r))| {
+            format!(
+                "{}{:.1} {:.1}",
+                if k == 0 { 'M' } else { 'L' },
+                cx(c),
+                cy(r)
+            )
+        })
+        .collect();
+    let marks: Vec<(f64, f64, String)> = (1..n)
+        .map(|i| {
+            let c = 1200.0 * (fr[i] / fr[0]).log2();
+            let k = ((c / max_c) * 600.0).round() as usize;
+            (
+                cx(c),
+                cy(curve[k.min(600)].1),
+                interval_name(a.notes[i] - a.notes[0]),
+            )
+        })
+        .collect();
+    let octaves: Vec<f64> = (1..=(max_c / 1200.0) as usize)
+        .map(|o| cx(o as f64 * 1200.0))
+        .collect();
     rsx! {
         section { class: "section",
             SectionHead { num: "04", title: "Inter-relations" }
@@ -110,6 +151,22 @@ pub fn InterRelations() -> Element {
                 div { class: "ramp" }
                 span { "rough" }
                 span { class: "src", "Sethares/Plomp–Levelt, relative to C4–D♭4" }
+            }
+            div { class: "curve-head",
+                span { class: "muted", "Dissonance curve over {a.note_names[0]}" }
+                span { class: "muted", "dots: this voicing" }
+            }
+            svg { class: "curve", view_box: "0 0 {cw} {ch}",
+                for x in octaves {
+                    line { class: "grid", x1: "{x}", x2: "{x}", y1: "{top}", y2: "{ch - bottom}" }
+                }
+                line { class: "base", x1: "0", x2: "{cw}", y1: "{ch - bottom}", y2: "{ch - bottom}" }
+                path { class: "curve-line", d: "{curve_d}" }
+                for (x, y, label) in marks {
+                    line { class: "marker", x1: "{x}", x2: "{x}", y1: "{y}", y2: "{ch - bottom}" }
+                    circle { class: "curve-dot", cx: "{x}", cy: "{y}", r: "3.5" }
+                    text { class: "mlabel", x: "{x}", y: "{ch - 6.0}", text_anchor: "middle", "{label}" }
+                }
             }
         }
     }

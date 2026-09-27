@@ -291,6 +291,22 @@ fn report(a: &Analysis, args: &Args) {
         println!("  beats: {}", audible.join(" · "));
     }
 
+    println!("\n  NEIGHBOURS (one note moved)");
+    let found = anatomy::explore::neighbours(&a.notes, opts);
+    for i in (0..a.notes.len()).rev() {
+        let cells: Vec<String> = [-2i8, -1, 1, 2]
+            .iter()
+            .map(|&s| {
+                found
+                    .iter()
+                    .find(|n| n.moved == i && n.step == s)
+                    .map_or("—".to_string(), |n| format!("{:+} {}", s, n.symbol))
+            })
+            .map(|c| pad(&c, 18))
+            .collect();
+        println!("  {} {}", pad(&a.note_names[i], 7), cells.concat());
+    }
+
     if let Some(x) = &a.extras {
         println!("\n  SET THEORY & CONSONANCE");
         println!(

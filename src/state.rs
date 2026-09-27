@@ -124,6 +124,39 @@ pub fn options(s: &Settings, tuning: Tuning, timbre: Timbre) -> Options {
     }
 }
 
+/// Keeps the voicing in the URL fragment (`#C3,G3,Ab3,Eb4`) so a chord can be shared: read once
+/// at startup, then rewritten whenever the notes change.
+pub fn use_url_sync(mut app: AppState) {
+    let mut loaded = use_signal(|| false);
+    use_future(move || async move {
+        // Sends the fragment now and again whenever the user edits it.
+        let mut eval = document::eval(
+            "dioxus.send(location.hash); window.addEventListener('hashchange', () => dioxus.send(location.hash)); await new Promise(() => {});",
+        );
+        while let Ok(v) = eval.recv::<serde_json::Value>().await {
+            let hash = v
+                .as_str()
+                .unwrap_or("")
+                .trim_start_matches('#')
+                .replace("%20", " ");
+            let notes = parse_notes(&hash);
+            if !notes.is_empty() && notes != *app.notes.peek() {
+                app.set_notes(notes);
+            }
+            loaded.set(true);
+        }
+    });
+    use_effect(move || {
+        let notes = app.notes.read().clone();
+        if !loaded() {
+            return;
+        }
+        // Flats only: '#' cannot appear inside a fragment.
+        let hash = format_notes(&notes, Spelling::Flats).replace(' ', ",");
+        let _ = document::eval(&format!("history.replaceState(null, '', '#{hash}')"));
+    });
+}
+
 pub fn use_app() -> AppState {
     use_context::<AppState>()
 }

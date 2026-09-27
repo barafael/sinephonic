@@ -9,7 +9,8 @@
 //!   Cook & Fujisawa tension/modality as extras;
 //! * tags whose explanations are checked against the voicing (see [`character`]), including
 //!   *unsettled* (six-four, 7th in the bass), *piquant*, *symmetric* and *bittersweet*;
-//! * a stability penalty for six-fours and 7ths in the bass.
+//! * a stability penalty for six-fours and 7ths in the bass;
+//! * roughness as the excess over the unison baseline ([`crate::roughness::excess_roughness`]).
 
 pub mod character;
 pub mod metrics;
@@ -20,7 +21,7 @@ use harmony::ratio::{gradus, lcm};
 use harmony::{Midi, PcSet, PitchClass};
 
 use crate::periodicity::{beats, smoothed_log_periodicity, Periodicity};
-use crate::reference::{harshness, pairs, BRIGHT};
+use crate::reference::{harshness, BRIGHT};
 use crate::{clamp01, distinct_pcs, max_partial, Analysis, Axes, Extras, Options};
 use character::{position, Position, Voicing};
 
@@ -32,7 +33,7 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
     let p = Periodicity::new(notes, opts.ratio_set, opts.a4);
     let all = reading::readings(notes, opts.spelling, &reading::WEIGHTS);
     let best = &all[0];
-    let pairs = pairs(notes, &p, opts);
+    let pairs = excess_pairs(notes, &p, opts);
     let smoothed = smoothed_log_periodicity(notes, opts.ratio_set);
 
     // The prototype's 1 − exp(−0.9·Σr) saturates: a close C3 major triad scored 0.85 and every
@@ -168,4 +169,24 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         note_names,
         extras: Some(extras),
     }
+}
+
+/// Pairs with roughness measured as the excess over the unison baseline.
+fn excess_pairs(notes: &[u8], p: &Periodicity, opts: &Options) -> Vec<crate::Pair> {
+    let fr = match opts.tuning {
+        crate::Tuning::Just => &p.just_freqs,
+        crate::Tuning::Et => &p.et_freqs,
+    };
+    let mut out = Vec::new();
+    for i in 0..notes.len() {
+        for j in i + 1..notes.len() {
+            out.push(crate::Pair {
+                i,
+                j,
+                semitones: notes[j] - notes[i],
+                roughness: crate::roughness::normalized_excess(fr[i], fr[j], opts.timbre, opts.a4),
+            });
+        }
+    }
+    out
 }

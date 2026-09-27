@@ -10,7 +10,19 @@ const HIGH: u8 = 84;
 #[component]
 pub fn Voicing() -> Element {
     let mut app = use_app();
+    let midi = use_signal(|| None::<String>);
     let notes = app.notes.read().clone();
+    let spelling = app.settings.read().spelling;
+    // Active keys show the note's spelled name from the analysis.
+    let label = |m: u8| -> Option<String> {
+        let a = app.analysis.read();
+        let i = notes.iter().position(|&x| x == m)?;
+        Some(match a.as_ref() {
+            Some(a) => a.note_names[i].clone(),
+            None => harmony::Midi(m).name(spelling),
+        })
+    };
+    let white_labels: Vec<Option<String>> = (LOW..=HIGH).map(label).collect();
     let whites: Vec<u8> = (LOW..=HIGH)
         .filter(|&m| !PitchClass::of_midi(m).is_black_key())
         .collect();
@@ -35,7 +47,11 @@ pub fn Voicing() -> Element {
                         key: "{m}",
                         class: if notes.contains(&m) { "white-key on" } else { "white-key" },
                         onclick: move |_| app.toggle(m),
-                        if m % 12 == 0 { "C{m / 12 - 1}" }
+                        if let Some(l) = &white_labels[(m - LOW) as usize] {
+                            "{l}"
+                        } else if m % 12 == 0 {
+                            "C{m / 12 - 1}"
+                        }
                     }
                 }
                 for (m, left) in blacks {
@@ -44,6 +60,9 @@ pub fn Voicing() -> Element {
                         class: if notes.contains(&m) { "black-key on" } else { "black-key" },
                         style: "left:{left}%;width:{width}%",
                         onclick: move |_| app.toggle(m),
+                        if let Some(l) = &white_labels[(m - LOW) as usize] {
+                            span { class: "klabel", "{l}" }
+                        }
                     }
                 }
             }
@@ -70,6 +89,12 @@ pub fn Voicing() -> Element {
                         }
                     }
                     button { class: "clear", onclick: move |_| app.set_notes([]), "clear" }
+                    match midi() {
+                        None => rsx! {
+                            button { class: "clear", onclick: move |_| crate::midi_input::connect(app, midi), "connect MIDI" }
+                        },
+                        Some(s) => rsx! { span { class: "midi-status", "{s}" } },
+                    }
                 }
             }
         }

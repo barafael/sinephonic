@@ -1,20 +1,26 @@
 mod character;
+mod clock;
 mod header;
 mod intervals;
 mod matrix;
+mod neighbours;
 mod readings;
 mod segmented;
 mod settings;
+mod spectrum;
 mod voicing;
 mod waveform;
 
 pub use character::Character;
+pub use clock::PcClock;
 pub use header::Header;
 pub use intervals::Intervals;
 pub use matrix::InterRelations;
+pub use neighbours::Neighbours;
 pub use readings::Readings;
 pub use segmented::Segmented;
 pub use settings::SettingsPanel;
+pub use spectrum::Spectrum;
 pub use voicing::Voicing;
 pub use waveform::Waveform;
 

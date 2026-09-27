@@ -5,9 +5,12 @@ use dioxus::prelude::*;
 
 mod audio;
 mod components;
+mod midi_input;
 mod state;
 
-use components::{Character, Header, InterRelations, Intervals, Readings, Voicing, Waveform};
+use components::{
+    Character, Header, InterRelations, Intervals, Neighbours, Readings, Spectrum, Voicing, Waveform,
+};
 use state::AppState;
 
 const MAIN_CSS: Asset = asset!("/assets/main.css");
@@ -20,6 +23,7 @@ fn main() {
 #[component]
 fn App() -> Element {
     let app = AppState::provide();
+    state::use_url_sync(app);
     let has = app.notes.read().len() >= 2;
     rsx! {
         document::Title { "Chord Anatomy" }
@@ -37,6 +41,8 @@ fn App() -> Element {
                     Character {}
                 }
                 Waveform {}
+                Spectrum {}
+                Neighbours {}
             } else {
                 div { class: "empty", "Select two or more notes to analyze." }
             }

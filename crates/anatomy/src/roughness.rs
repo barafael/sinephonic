@@ -37,6 +37,21 @@ pub fn pair_roughness(f1: f64, f2: f64, timbre: Timbre) -> f64 {
         .sum()
 }
 
+/// Roughness a dyad adds over its two tones sounding alone at unison: the pairwise sum also
+/// counts cross pairs such as (2f, 3f) between identical tones, which are really each tone's
+/// own internal roughness. Subtracting that baseline makes an octave 0 and stops low
+/// consonances (C2–G2) from rating like semitones.
+pub fn excess_roughness(f1: f64, f2: f64, timbre: Timbre) -> f64 {
+    let own = 0.5 * (pair_roughness(f1, f1, timbre) + pair_roughness(f2, f2, timbre));
+    (pair_roughness(f1, f2, timbre) - own).max(0.0)
+}
+
+/// Excess roughness relative to the excess of C4–D♭4, clamped to 0..1.
+pub fn normalized_excess(f1: f64, f2: f64, timbre: Timbre, a4: f64) -> f64 {
+    let reference = excess_roughness(Midi(60).freq(a4), Midi(61).freq(a4), timbre);
+    (excess_roughness(f1, f2, timbre) / reference).clamp(0.0, 1.0)
+}
+
 /// Roughness of the reference dyad C4–D♭4 at this A4 and timbre.
 pub fn reference(a4: f64, timbre: Timbre) -> f64 {
     pair_roughness(Midi(60).freq(a4), Midi(61).freq(a4), timbre)
@@ -61,6 +76,26 @@ mod tests {
                 assert!((0.0..=1.0).contains(&n));
             }
         }
+    }
+
+    #[test]
+    fn excess_removes_the_unison_baseline() {
+        let t = Timbre::Harmonic6;
+        let c3 = Midi(48).freq(440.0);
+        assert!(excess_roughness(c3, 2.0 * c3, t) < 1e-3);
+        assert!(pair_roughness(c3, 2.0 * c3, t) > 0.05);
+        let low_fifth = normalized_excess(Midi(36).freq(440.0), Midi(43).freq(440.0), t, 440.0);
+        assert!(low_fifth < 0.6, "{low_fifth}");
+        assert_eq!(
+            normalized_excess(Midi(60).freq(440.0), Midi(61).freq(440.0), t, 440.0),
+            1.0
+        );
+        // Sine tones have no cross partials: excess equals the plain value.
+        let s = Timbre::Sine;
+        assert_eq!(
+            excess_roughness(200.0, 213.0, s),
+            pair_roughness(200.0, 213.0, s)
+        );
     }
 
     #[test]
