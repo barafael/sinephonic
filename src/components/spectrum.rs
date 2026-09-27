@@ -6,8 +6,8 @@ use super::SectionHead;
 use crate::state::use_app;
 
 const LEFT: f64 = 120.0;
-const LANE: f64 = 34.0;
-const PAD: f64 = 26.0;
+const LANE: f64 = 56.0;
+const PAD: f64 = 30.0;
 const AXIS: f64 = 30.0;
 
 /// Every partial on a log-frequency axis, one lane per note, with the partials that meet on the
@@ -81,7 +81,7 @@ pub fn Spectrum() -> Element {
     };
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "07", title: "Spectrum", hint: "partials on the harmonic series".to_string() }
+            SectionHead { num: "09", title: "Spectrum", hint: "partials on the harmonic series".to_string() }
             div {
                 onresize: move |e| {
                     if let Ok(size) = e.get_content_box_size() {

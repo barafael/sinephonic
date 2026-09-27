@@ -10,7 +10,8 @@ A one-screen chord-voicing analyser, built from the design handoff in
 - character tags and axes on a valence × arousal map
 - each note's waveform and the summed waveform, with playback
 - the partial spectrum on the chord's harmonic series, with 12-TET beat rates
-- Sethares' dissonance curve over the bass, with the voicing's intervals marked
+- a consonance landscape: Sethares' roughness and Erlich's harmonic entropy for every interval above the bass, with the voicing's intervals marked
+- information measures in bits (harmonic entropy, description length, period, root, interval and spectral entropy) and the complexity score built from them
 - voice-leading neighbours: every chord one semitone or tone away, clickable
 - pitch-class clocks (chromatic and circle of fifths)
 

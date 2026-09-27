@@ -291,6 +291,32 @@ fn report(a: &Analysis, args: &Args) {
         println!("  beats: {}", audible.join(" · "));
     }
 
+    if let Some(i) = &a.information {
+        println!("\n  INFORMATION (bits)");
+        println!(
+            "  complexity {:.2} · harmonic entropy {:.2} mean, {:.2} max ({:.0}% of range)",
+            i.complexity,
+            i.harmonic_entropy,
+            i.harmonic_entropy_max,
+            i.harmonic_entropy_norm * 100.0
+        );
+        println!(
+            "  description {:.1} · period {:.2} (smoothed {:.2}) · root entropy {:.2}/{:.2}",
+            i.description_bits,
+            i.period_bits,
+            i.smoothed_period_bits,
+            i.root_entropy,
+            12f64.log2()
+        );
+        println!(
+            "  interval entropy {:.2}/{:.2} · spectral entropy {:.2}/{:.2}",
+            i.interval_entropy,
+            6f64.log2(),
+            i.spectral_entropy,
+            i.spectral_entropy_max
+        );
+    }
+
     println!("\n  NEIGHBOURS (one note moved)");
     let found = anatomy::explore::neighbours(&a.notes, opts);
     for i in (0..a.notes.len()).rev() {

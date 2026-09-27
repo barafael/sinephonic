@@ -372,7 +372,7 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         freqs,
         crate::max_partial(opts.timbre),
     );
-    Analysis {
+    let mut a = Analysis {
         beats,
         note_names: notes
             .iter()
@@ -397,7 +397,16 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         arousal,
         tags,
         extras: None,
-    }
+        information: None,
+    };
+    let smoothed = crate::periodicity::smoothed_log_periodicity(notes, opts.ratio_set);
+    a.information = Some(crate::information::measure(
+        &a,
+        opts.tuning,
+        opts.timbre,
+        smoothed,
+    ));
+    a
 }
 
 fn tags(

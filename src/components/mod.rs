@@ -1,6 +1,8 @@
 mod character;
 mod clock;
+mod curve;
 mod header;
+mod information;
 mod intervals;
 mod matrix;
 mod neighbours;
@@ -13,7 +15,9 @@ mod waveform;
 
 pub use character::Character;
 pub use clock::PcClock;
+pub use curve::DissonanceCurve;
 pub use header::Header;
+pub use information::Information;
 pub use intervals::Intervals;
 pub use matrix::InterRelations;
 pub use neighbours::Neighbours;

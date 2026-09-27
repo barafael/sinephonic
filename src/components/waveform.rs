@@ -102,7 +102,7 @@ pub fn Waveform() -> Element {
     }
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "06", title: "Waveform" }
+            SectionHead { num: "08", title: "Waveform" }
             div { class: "wave-top",
                 div { class: "stats",
                     for (k, v) in stats {

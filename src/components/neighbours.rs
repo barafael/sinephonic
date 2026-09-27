@@ -34,7 +34,7 @@ pub fn Neighbours() -> Element {
         .collect();
     rsx! {
         section { class: "section",
-            SectionHead { num: "08", title: "Neighbours", hint: "move one note · click to go there".to_string() }
+            SectionHead { num: "10", title: "Neighbours", hint: "move one note · click to go there".to_string() }
             div { class: "scroll-x",
                 div { class: "nb-table",
                     div { class: "th", "Note" }

@@ -4,7 +4,8 @@
 //! * a structured symbol builder (7♭5, 13, 9sus4, ø9, power chords; no `°(maj7)♭7`);
 //! * root scores that add Parncutt's root support and Hindemith's interval roots to the
 //!   template fit;
-//! * complexity from Stolzenburg's smoothed periodicity;
+//! * complexity from information measures: harmonic entropy, period bits, root and interval
+//!   entropy (see [`crate::information`]);
 //! * set-class identity, named sonorities, Huron consonance, Tenney height, Euler's gradus and
 //!   Cook & Fujisawa tension/modality as extras;
 //! * tags whose explanations are checked against the voicing (see [`character`]), including
@@ -54,17 +55,8 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
     } else {
         clamp01(all[1].prob / all[0].prob * 1.1)
     };
-    let complexity = clamp01(
-        0.4 * clamp01(smoothed / 7.0)
-            + 0.25 * clamp01(best.alterations as f64 / 3.0)
-            + 0.15 * clamp01((pcs.len() as f64 - 3.0) / 4.0)
-            + 0.1 * ambiguity
-            + if !fifth_frame && tension > 0.3 {
-                0.15
-            } else {
-                0.0
-            },
-    );
+    // Replaced below by the information-theoretic composite; arousal is updated with it.
+    let complexity = 0.0;
     let (mut br, mut c) = (0.0, 0);
     for &pc in &pcs {
         let ic = best.root.up_to(pc);
@@ -146,7 +138,7 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         names: &note_names,
     };
     let tags = character::tags(&voicing, &all, &pairs, &p, ambiguity, set, opts);
-    Analysis {
+    let mut a = Analysis {
         beats,
         notes: notes.to_vec(),
         pcs,
@@ -168,7 +160,13 @@ pub fn analyze(notes: &[u8], opts: &Options) -> Analysis {
         tags,
         note_names,
         extras: Some(extras),
-    }
+        information: None,
+    };
+    let info = crate::information::measure(&a, opts.tuning, opts.timbre, smoothed);
+    a.axes.complexity = info.complexity;
+    a.arousal = clamp01(0.5 * a.axes.tension + 0.3 * a.axes.aggression + 0.2 * info.complexity);
+    a.information = Some(info);
+    a
 }
 
 /// Pairs with roughness measured as the excess over the unison baseline.

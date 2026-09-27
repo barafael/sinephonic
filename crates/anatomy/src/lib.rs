@@ -13,6 +13,7 @@ pub mod corpus;
 pub mod degree;
 pub mod explore;
 pub mod improved;
+pub mod information;
 pub mod periodicity;
 pub mod reference;
 pub mod roughness;
@@ -212,6 +213,8 @@ pub struct Analysis {
     /// Display name of each note, e.g. "E♭4".
     pub note_names: Vec<String>,
     pub extras: Option<Extras>,
+    /// Entropy and information measures (see [`information`]).
+    pub information: Option<information::Information>,
 }
 
 impl Analysis {

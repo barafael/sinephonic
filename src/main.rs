@@ -9,7 +9,8 @@ mod midi_input;
 mod state;
 
 use components::{
-    Character, Header, InterRelations, Intervals, Neighbours, Readings, Spectrum, Voicing, Waveform,
+    Character, DissonanceCurve, Header, Information, InterRelations, Intervals, Neighbours,
+    Readings, Spectrum, Voicing, Waveform,
 };
 use state::AppState;
 
@@ -40,6 +41,8 @@ fn App() -> Element {
                     InterRelations {}
                     Character {}
                 }
+                Information {}
+                DissonanceCurve {}
                 Waveform {}
                 Spectrum {}
                 Neighbours {}

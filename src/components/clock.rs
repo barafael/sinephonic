@@ -13,9 +13,9 @@ pub fn PcClock(
     title: &'static str,
     spelling: Spelling,
 ) -> Element {
-    let size = 132.0;
+    let size = 190.0;
     let c = size / 2.0;
-    let r = 40.0;
+    let r = 62.0;
     let pos = |pc: u8| {
         // Position of pc on the circle: index k with k·step ≡ pc (mod 12); 7 is its own inverse.
         let k = (pc as u32 * step as u32 % 12) as f64;
@@ -37,8 +37,8 @@ pub fn PcClock(
             let k = (pc as u32 * step as u32 % 12) as f64;
             let a = k / 12.0 * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
             (
-                c + (r + 13.0) * a.cos(),
-                c + (r + 13.0) * a.sin() + 3.5,
+                c + (r + 16.0) * a.cos(),
+                c + (r + 16.0) * a.sin() + 3.5,
                 spelling.pc_name(PitchClass::new(pc as i32)).to_string(),
                 pcs.contains(&pc),
             )
@@ -63,9 +63,9 @@ pub fn PcClock(
                 }
                 for (x, y, is_root, is_bass) in dots {
                     if is_bass {
-                        circle { class: "clock-bass", cx: "{x}", cy: "{y}", r: "7" }
+                        circle { class: "clock-bass", cx: "{x}", cy: "{y}", r: "9" }
                     }
-                    circle { class: if is_root { "clock-dot root" } else { "clock-dot" }, cx: "{x}", cy: "{y}", r: "4" }
+                    circle { class: if is_root { "clock-dot root" } else { "clock-dot" }, cx: "{x}", cy: "{y}", r: "5.5" }
                 }
             }
             figcaption { "{title}" }
