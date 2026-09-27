@@ -1,0 +1,14 @@
+[package]
+name = "anatomy-oracle"
+description = "Test-only: runs the design prototype's JavaScript to check the Rust port against it."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+boa_engine = "0.20"
+anatomy = { path = "../anatomy" }
+harmony = { path = "../harmony" }
+serde_json = "1.0.151"

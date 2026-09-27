@@ -1,0 +1,74 @@
+# sinephonic: Chord Anatomy
+
+A one-screen chord-voicing analyser, built from the design handoff in
+`Chord Anatomy_ Interactive Analysis.zip`, in Dioxus 0.7. It shows:
+
+- the root readings and chord symbols
+- the interval of each note above the bass, with its function
+- just ratios, harmonic numbers and the chord period
+- pairwise roughness
+- character tags and axes on a valence × arousal map
+- each note's waveform and the summed waveform, with playback
+
+## Layout
+
+```
+src/                    Dioxus app (web; desktop via the `desktop` feature)
+assets/main.css         design tokens and styles from the handoff
+crates/harmony/         musical algebra, no dependencies
+crates/anatomy/         analysis engine, depends only on harmony
+crates/anatomy-cli/     `anatomy` terminal tool for judging voicings
+crates/anatomy-oracle/  test-only: runs the prototype's JavaScript in Boa
+```
+
+The analysis crates contain no Dioxus code.
+
+### harmony
+
+- `pc`: pitch classes (ℤ/12) and pitch-class sets as bitmasks, with Tₙ/TₙI, prime form (Rahn), interval vectors, Forte names (with Z) and symmetry.
+- `spelled`: spelled pitches and intervals as line-of-fifths coordinates (fifths, octaves) ∈ ℤ², after Temperley and DCMLab `pitchtypes`. Qualities d/m/P/M/A and chord-tone spelling (C°7 = C E♭ G♭ B𝄫).
+- `ratio`: exact rationals, the 5-limit, 7-limit and Stolzenburg ratio sets, common harmonics, Tenney height and Euler's gradus.
+- `midi`: frequencies, note names and the note-text parser from the handoff.
+
+### anatomy
+
+It has two models with one output type:
+
+- **Prototype** (`reference.rs`): an exact port of the handoff's JS. `anatomy-oracle` checks it field by field against the original script over thousands of voicings.
+- **Improved** (default, `improved/`):
+  - chord tones spelled on the line of fifths
+  - a structured symbol builder: 7♭5, 13, 9sus4, ø9, power chords, hybrid slash chords like F/G, and no more `A°(maj7)♭7/C`
+  - Harte labels
+  - root scores combining template fit with Parncutt's root support, the bass, Hindemith's interval roots and a dominant-chord prior
+  - complexity from Stolzenburg's smoothed periodicity
+  - set class, named sonorities, Huron consonance and Cook–Fujisawa tension and modality
+  - *symmetric* and *bittersweet* tags
+
+  The weights in `improved/reading.rs` are fitted to `crates/anatomy/tests/corpus.txt` by `cargo run --release -p anatomy --example tune`.
+
+## Commands
+
+```sh
+dx serve --platform web                              # the app
+cargo test --workspace --exclude sinephonic
+cargo run -p anatomy-cli -- C3 G3 Ab3 Eb4            # full report
+cargo run -p anatomy-cli -- --compare "C E G Bb D#"  # prototype vs improved
+cargo run -p anatomy-cli -- corpus                   # judge the corpus
+```
+
+The desktop build (`dx serve --platform desktop`) needs webkit2gtk-4.1.
+
+## Adding voicings to the corpus
+
+Each line of `crates/anatomy/tests/corpus.txt` is one voicing:
+
+```
+E3 G3 C4          = C/E
+Eb3 G3 Bb3 C4     = E♭6   ~ Cm7/E♭   ! both are standard
+C3 E3 G3          = C     @ fused
+```
+
+- `=` gives the expected best reading.
+- `~` lists other acceptable best readings.
+- `@` lists tags that must appear.
+- `!` marks the entry as disputed: it is reported but never fails.

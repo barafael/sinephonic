@@ -1,0 +1,8 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 59969239cccb89de194f695dcdba6d05d246f420d6dd2950116e5f2ba346d255 # shrinks to notes = [30, 35, 40, 45], pick = 0, opts = Options { spelling: Flats, ratio_set: Stolzenburg, a4: 440.0, timbre: Harmonic6, tuning: Just, model: Improved }
+cc 382372aa697ee7c3db05f4c0f3d6a3be85b31c1a96ac7cf3d862611dc0df2901 # shrinks to notes = [46, 52, 65, 66, 80], k = 6, opts = Options { spelling: Flats, ratio_set: FiveLimit, a4: 440.0, timbre: Harmonic6, tuning: Just, model: Prototype }

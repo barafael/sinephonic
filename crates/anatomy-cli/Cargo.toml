@@ -1,0 +1,15 @@
+[package]
+name = "anatomy-cli"
+description = "Terminal tool for analysing and judging chord voicings."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "anatomy"
+path = "src/main.rs"
+
+[dependencies]
+anatomy = { path = "../anatomy" }
+harmony = { path = "../harmony" }

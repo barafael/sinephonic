@@ -1,0 +1,47 @@
+[workspace]
+members = [".", "crates/*"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["rafael"]
+version = "0.1.0"
+license = "MIT"
+
+[package]
+name = "sinephonic"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+dioxus = { version = "0.7.1" }
+anatomy = { path = "crates/anatomy" }
+harmony = { path = "crates/harmony" }
+
+[features]
+default = ["web"]
+web = ["dioxus/web"]
+desktop = ["dioxus/desktop"]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
+
+# The differential tests interpret JavaScript; an optimised interpreter keeps them fast.
+[profile.dev.package.boa_engine]
+opt-level = 3
+[profile.dev.package.boa_parser]
+opt-level = 3
+[profile.dev.package.boa_ast]
+opt-level = 3
+[profile.dev.package.boa_gc]
+opt-level = 3
+[profile.dev.package.boa_interner]
+opt-level = 3

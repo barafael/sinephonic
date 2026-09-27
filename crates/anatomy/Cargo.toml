@@ -1,0 +1,13 @@
+[package]
+name = "anatomy"
+description = "Chord-voicing analysis: root readings, symbols, periodicity, roughness, character."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+harmony = { path = "../harmony" }
+
+[dev-dependencies]
+proptest = "1"
