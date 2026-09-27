@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "crates/*"]
+members = ["crates/*"]
 resolver = "2"
 
 [workspace.package]
@@ -8,32 +8,13 @@ authors = ["rafael"]
 version = "0.1.0"
 license = "MIT"
 
-[package]
-name = "sinephonic"
-version.workspace = true
-authors.workspace = true
-edition.workspace = true
-
-[dependencies]
-dioxus = { version = "0.7.1" }
-anatomy = { path = "crates/anatomy" }
-harmony = { path = "crates/harmony" }
-serde_json = "1.0.151"
-
-[features]
-default = ["web"]
-web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
-
-[profile.wasm-dev]
-inherits = "dev"
-opt-level = 1
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"
+# Size-optimised build for the WebAssembly bundle (see scripts/build-web.sh).
+[profile.wasm]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
 
 # The differential tests interpret JavaScript; an optimised interpreter keeps them fast.
 [profile.dev.package.boa_engine]

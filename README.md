@@ -1,7 +1,7 @@
 # sinephonic: Chord Anatomy
 
-A one-screen chord-voicing analyser, built from the design handoff in
-`Chord Anatomy_ Interactive Analysis.zip`, in Dioxus 0.7. It shows:
+A one-screen chord-voicing analyser: Rust analysis crates compiled to WebAssembly, and a plain
+HTML, CSS and JavaScript front end with no framework and no bundler. It shows:
 
 - the root readings and chord symbols
 - the interval of each note above the bass, with its function
@@ -20,7 +20,7 @@ matrix cells, tags (the notes they're about), spectrum beats, any point of the c
 landscape, waveform lanes, clock notes and the reference chords on the mood map. Sounding keys
 light up. The header shows the voicing on a grand staff, spelled as analysed. The page tint
 follows the chord's mood (valence, arousal), faintly, in light and dark themes. Presets are a
-random handful from a pool of about 90 voicings in all keys (**shuffle** for more). The layout
+random handful from a pool of 87 voicings in all keys (**shuffle** for more). The layout
 uses the full width of large screens and becomes one long page on phones.
 
 12-TET is the default tuning; just intonation is a toggle. The voicing is kept in the URL
@@ -31,15 +31,17 @@ hardware.
 ## Layout
 
 ```
-src/                    Dioxus app (web; desktop via the `desktop` feature)
-assets/main.css         design tokens and styles from the handoff
+web/                    the app: index.html, style.css, js/ (ES modules), pkg/ (generated)
 crates/harmony/         musical algebra, no dependencies
 crates/anatomy/         analysis engine, depends only on harmony
+crates/anatomy-wasm/    wasm-bindgen exports: MIDI numbers and an options JSON in, JSON out
 crates/anatomy-cli/     `anatomy` terminal tool for judging voicings
 crates/anatomy-oracle/  test-only: runs the prototype's JavaScript in Boa
+scripts/build-web.sh    builds anatomy-wasm and writes the bindings to web/pkg
 ```
 
-The analysis crates contain no Dioxus code.
+The JavaScript only renders the analysis and plays sound (WebAudio, Web MIDI). All music theory
+lives in the Rust crates; `anatomy-wasm` is the only place that knows about JSON.
 
 ### harmony
 
@@ -70,29 +72,27 @@ It has two models with one output type:
 ## Commands
 
 ```sh
-dx serve --platform web                              # the app
-cargo test --workspace --exclude sinephonic
+./scripts/build-web.sh                               # wasm bundle → web/pkg (≈ 450 KB)
+python3 -m http.server -d web 8080                   # then open http://localhost:8080
+cargo test --workspace
 cargo run -p anatomy-cli -- C3 G3 Ab3 Eb4            # full report
 cargo run -p anatomy-cli -- --compare "C E G Bb D#"  # prototype vs improved
 cargo run -p anatomy-cli -- corpus                   # judge the corpus
 ```
 
-The desktop build (`dx serve --platform desktop`) needs webkit2gtk-4.1.
+Building needs the `wasm32-unknown-unknown` target and `wasm-bindgen-cli` at the version pinned in
+`crates/anatomy-wasm/Cargo.toml` (`cargo binstall wasm-bindgen-cli@0.2.129`). `wasm-opt` is used
+if installed.
 
-## Deploying to Fly.io
+## Deployment
 
-The app is static: `dx bundle --platform web --release` writes HTML, JS and WebAssembly to
-`target/dx/sinephonic/release/web/public`. The `Dockerfile` builds that bundle and serves it
-with nginx on port 8080 (`deploy/nginx.conf`: hashed assets cached for a year, `index.html`
-always revalidated, `.wasm` served as `application/wasm`).
+**GitHub Pages** (`.github/workflows/pages.yml`): every push to `main` runs clippy and the tests,
+builds the bundle and publishes `web/`. In the repository settings, set *Pages → Build and
+deployment → Source* to **GitHub Actions** once. All paths are relative, so the site works under
+`/sinephonic/`.
 
-```sh
-fly auth login
-fly launch --no-deploy      # first time: pick a unique app name and region; keeps fly.toml
-fly deploy                  # builds on Fly's remote builder, no local Docker needed
-```
-
-`fly.toml` scales to zero when idle (`auto_stop_machines`) and starts on the next request.
+**Fly.io** (optional): the `Dockerfile` builds the same bundle and serves `web/` with nginx on port
+8080 (`deploy/nginx.conf`); `fly launch --no-deploy` once, then `fly deploy`.
 
 ## Adding voicings to the corpus
 

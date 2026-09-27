@@ -8,3 +8,6 @@
 
 # Design handoff (kept locally, not published)
 *.zip
+
+# Generated WebAssembly bindings (scripts/build-web.sh)
+web/pkg/

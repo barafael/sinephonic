@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chord Anatomy</title>
+  <meta name="description" content="Chord Anatomy: root readings, intervals, roughness, character, information and sound of any chord voicing.">
+  <link rel="icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Music&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header-left">
+        <div class="eyebrow-row">
+          <span class="eyebrow">Chord anatomy — voicing analysis</span>
+          <button class="link-button" data-act="settings" id="settings-toggle">settings</button>
+          <div id="settings"></div>
+        </div>
+        <div class="chord-name" id="chord-name">—</div>
+        <div class="muted" id="notes-line">loading…</div>
+      </div>
+      <div class="header-staff" id="staff" title="click to play"></div>
+      <div class="header-right">
+        <div class="summary" id="summary"></div>
+        <div class="buttons">
+          <button class="btn btn-accent" data-act="play">Play</button>
+          <button class="btn btn-outline" data-act="arpeggiate">Arpeggiate</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="section" style="gap:16px">
+      <div id="voicing-head"></div>
+      <div class="keyboard" id="keyboard"></div>
+      <div class="input-row">
+        <input class="note-input" id="note-input" placeholder="C3 G3 Ab3 Eb4" spellcheck="false" autocomplete="off" aria-label="Notes">
+        <div class="chips" id="chips"></div>
+      </div>
+    </section>
+
+    <div class="empty" id="empty" hidden>Select two or more notes to analyze.</div>
+
+    <div id="analysis">
+      <div class="grid">
+        <section class="section" id="readings"></section>
+        <div class="stack">
+          <section class="section" id="intervals"></section>
+          <section class="section" id="pitch-space"></section>
+        </div>
+        <section class="section" id="matrix"></section>
+        <section class="section" id="character"></section>
+      </div>
+      <div class="wide-grid">
+        <section class="wave-section" id="information"></section>
+        <section class="wave-section" id="landscape-section">
+          <div id="landscape-head"></div>
+          <div id="landscape"></div>
+          <div class="legend">
+            <span class="swatch solid"></span><span>sensory roughness (Sethares, excess over unison, current tone model and bass register)</span>
+            <span class="swatch dashed"></span><span>harmonic entropy (Erlich, register-free)</span>
+          </div>
+          <p class="wave-caption">Both curves dip at simple ratios. Roughness comes from beating partials and grows in low registers; harmonic entropy measures how clearly an interval implies one ratio. The voicing’s notes sit where the dots are: labels show the interval above the bass, its roughness r and its normalised harmonic entropy.</p>
+        </section>
+        <section class="wave-section" id="waveform-section">
+          <div id="waveform-headline"></div>
+          <div class="wave-top" id="waveform-head"></div>
+          <div id="waveform"></div>
+          <p class="wave-caption" id="waveform-caption"></p>
+        </section>
+        <section class="wave-section" id="spectrum-section">
+          <div id="spectrum-headline"></div>
+          <div id="spectrum"></div>
+          <p class="wave-caption" id="spectrum-caption"></p>
+        </section>
+        <section class="section" id="neighbours"></section>
+      </div>
+    </div>
+  </div>
+  <noscript><p class="empty">Chord Anatomy needs JavaScript and WebAssembly.</p></noscript>
+</body>
+</html>

@@ -359,7 +359,7 @@ body { background: var(--paper); color: var(--ink); transition: background-color
 .white-key.sounding, .black-key.sounding { box-shadow: 0 0 0 2px var(--accent), 0 0 18px 4px var(--glow); z-index: 2; }
 .white-key.sounding:not(.on) { background: color-mix(in oklch, var(--accent) 35%, var(--key-white)); }
 .black-key.sounding:not(.on) { background: color-mix(in oklch, var(--accent) 60%, var(--key-black)); }
-.white-key { position: relative; flex-direction: column; gap: 2px; }
+.white-key { position: relative; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
 .kdeg { font-family: var(--serif); font-size: 13px; line-height: 1; }
 .white-key.on .kdeg { color: var(--on-accent); }
 .black-key .kdeg { font-size: 10px; color: var(--on-accent); margin-bottom: 2px; }
