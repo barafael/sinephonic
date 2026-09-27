@@ -102,7 +102,7 @@ pub fn Waveform() -> Element {
     }
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "08", title: "Waveform", hint: "click a lane to hear it".to_string() }
+            SectionHead { num: "09", title: "Waveform", hint: "click a lane to hear it".to_string() }
             div { class: "wave-top",
                 div { class: "stats",
                     for (k, v) in stats {

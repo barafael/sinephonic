@@ -6,3 +6,5 @@
 # everyone who runs the test benefits from these saved cases.
 cc 59969239cccb89de194f695dcdba6d05d246f420d6dd2950116e5f2ba346d255 # shrinks to notes = [30, 35, 40, 45], pick = 0, opts = Options { spelling: Flats, ratio_set: Stolzenburg, a4: 440.0, timbre: Harmonic6, tuning: Just, model: Improved }
 cc 382372aa697ee7c3db05f4c0f3d6a3be85b31c1a96ac7cf3d862611dc0df2901 # shrinks to notes = [46, 52, 65, 66, 80], k = 6, opts = Options { spelling: Flats, ratio_set: FiveLimit, a4: 440.0, timbre: Harmonic6, tuning: Just, model: Prototype }
+cc a1fda9783b73d6a66fbe1aa55bbdcd8289042f4c08371d636a4bbfc797eba4f3 # shrinks to notes = [56, 63], k = 11, opts = Options { spelling: Flats, ratio_set: Stolzenburg, a4: 440.0, timbre: Harmonic6, tuning: Et, model: Improved }
+cc ab15a7f9a812e95dfcb80a3c5ece7da7cb67c8550ceabb9fec586742770af171 # shrinks to notes = [41, 42, 65], k = 7, opts = Options { spelling: Flats, ratio_set: Stolzenburg, a4: 440.0, timbre: Harmonic6, tuning: Et, model: Improved }

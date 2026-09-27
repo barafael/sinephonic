@@ -12,7 +12,7 @@ mod state;
 
 use components::{
     Character, DissonanceCurve, Header, Information, InterRelations, Intervals, Neighbours,
-    Readings, Spectrum, Voicing, Waveform,
+    PitchSpace, Readings, Spectrum, Voicing, Waveform,
 };
 use state::AppState;
 
@@ -65,7 +65,11 @@ fn App() -> Element {
             if has {
                 div { class: "grid",
                     Readings {}
-                    Intervals {}
+                    // Intervals and pitch-class space share a column so it matches Readings' height.
+                    div { class: "stack",
+                        Intervals {}
+                        PitchSpace {}
+                    }
                     InterRelations {}
                     Character {}
                 }

@@ -83,7 +83,7 @@ pub fn Spectrum() -> Element {
     };
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "09", title: "Spectrum", hint: "click a lane or a beat to hear it".to_string() }
+            SectionHead { num: "10", title: "Spectrum", hint: "click a lane or a beat to hear it".to_string() }
             div {
                 onresize: move |e| {
                     if let Ok(size) = e.get_content_box_size() {

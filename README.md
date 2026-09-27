@@ -13,7 +13,7 @@ A one-screen chord-voicing analyser, built from the design handoff in
 - a consonance landscape: Sethares' roughness and Erlich's harmonic entropy for every interval above the bass, with the voicing's intervals marked
 - information measures in bits (harmonic entropy, description length, period, root, interval and spectral entropy) and the complexity score built from them
 - voice-leading neighbours: every chord one semitone or tone away, clickable
-- pitch-class clocks (chromatic and circle of fifths)
+- pitch-class space: chromatic and circle-of-fifths clocks, set class, symmetry, the interval-class vector, and Parncutt's root support for every candidate root
 
 Almost everything plays when clicked: keys, presets, readings (over their root), interval rows,
 matrix cells, tags (the notes they're about), spectrum beats, any point of the consonance

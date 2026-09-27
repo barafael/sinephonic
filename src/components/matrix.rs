@@ -87,7 +87,7 @@ pub fn InterRelations() -> Element {
     }
     rsx! {
         section { class: "section",
-            SectionHead { num: "04", title: "Inter-relations" }
+            SectionHead { num: "05", title: "Inter-relations" }
             div { class: "caption-row",
                 span { class: "muted",
                     if app.tuning.cloned() == anatomy::Tuning::Et {

@@ -33,7 +33,7 @@ pub fn Character() -> Element {
     let (x, y) = position(a.valence, a.arousal);
     rsx! {
         section { class: "section",
-            SectionHead { num: "05", title: "Character" }
+            SectionHead { num: "06", title: "Character" }
             div { class: "tags",
                 for t in a.tags.iter().take(5) {
                     div {

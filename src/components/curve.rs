@@ -126,7 +126,7 @@ pub fn DissonanceCurve() -> Element {
         .collect();
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "07", title: "Consonance landscape", hint: format!("every interval above {} · click to hear any of them", a.note_names[0]) }
+            SectionHead { num: "08", title: "Consonance landscape", hint: format!("every interval above {} · click to hear any of them", a.note_names[0]) }
             div {
                 onresize: move |e| {
                     if let Ok(size) = e.get_content_box_size() {

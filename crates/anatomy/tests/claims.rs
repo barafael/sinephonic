@@ -129,6 +129,30 @@ fn check(a: &Analysis, tuning: Tuning) -> Result<(), TestCaseError> {
                 "{ctx}"
             ),
             "fused" if tuning == Tuning::Et => prop_assert!(why.contains("approximate"), "{ctx}"),
+            "fused" => prop_assert!(
+                a.periodicity.bass_cycles <= 4 && why.contains("are harmonics"),
+                "{ctx}"
+            ),
+            "blended" => prop_assert!((5..=8).contains(&a.periodicity.bass_cycles), "{ctx}"),
+            "diffuse" => prop_assert!(a.periodicity.bass_cycles >= 120, "{ctx}"),
+            "doubled" => prop_assert_eq!(a.pcs.len(), 1, "{}", ctx),
+            "hollow" => prop_assert_eq!(a.pcs.len(), 2, "{}", ctx),
+            "overtone" => prop_assert!(a.periodicity.bass_cycles == 1 && a.pcs.len() > 1, "{ctx}"),
+            "muddy" => {
+                let (x, rest) = why.split_once('–').unwrap();
+                let y = rest.split(' ').next().unwrap();
+                let i = a.note_names.iter().position(|n| n == x).unwrap();
+                let j = a.note_names.iter().position(|n| n == y).unwrap();
+                prop_assert!(a.notes[j] - a.notes[i] <= 4 && a.notes[i] < 48, "{ctx}");
+            }
+            "close" => prop_assert!(a.notes[a.notes.len() - 1] - a.notes[0] <= 12, "{ctx}"),
+            "spread" => prop_assert!(a.notes[a.notes.len() - 1] - a.notes[0] >= 24, "{ctx}"),
+            "airy" => prop_assert!(a.notes[0] >= 67, "{ctx}"),
+            "grounded" | "offset" => {
+                let below = 12.0 * (a.periodicity.bass_cycles as f64).log2();
+                let f = PitchClass::new(a.notes[0] as i32 - below.round() as i32);
+                prop_assert_eq!(f == best.root, t.word == "grounded", "{}", ctx);
+            }
             "cloudy" if tuning == Tuning::Et => {
                 prop_assert!(why.contains("never repeats"), "{ctx}")
             }
@@ -155,7 +179,7 @@ fn six_four_is_not_called_stable() {
     let a = analyze(&[48, 53, 56], &Options::default()).unwrap();
     assert_eq!(a.best().symbol, "Fm/C");
     let words: Vec<&str> = a.tags.iter().map(|t| t.word).collect();
-    assert_eq!(words, ["unsettled", "somber"], "{:?}", a.tags);
+    assert_eq!(&words[..2], ["unsettled", "somber"], "{:?}", a.tags);
     assert!(a.tags.iter().all(|t| !t.why.contains("stable, but")));
     assert_eq!(a.summary(), "Unsettled and somber");
     let root_position = analyze(&[53, 56, 60], &Options::default()).unwrap();

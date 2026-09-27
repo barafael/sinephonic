@@ -260,7 +260,7 @@ button { font: inherit; cursor: pointer; }
 .identity-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; align-items: start; }
 .identity-row .identity { grid-column: 1 / -1; }
 .clock { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.clock svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.clock svg { width: 100%; max-width: 300px; height: auto; display: block; }
 .clock figcaption { font-size: 12px; color: var(--muted); }
 .clock-ring { fill: none; stroke: var(--line); stroke-width: 1.5; }
 .clock-poly { fill: color-mix(in oklch, var(--accent) 12%, transparent); stroke: var(--accent); stroke-width: 2; }
@@ -406,3 +406,28 @@ body { background: var(--paper); color: var(--ink); transition: background-color
   .white-key { font-size: 8px; }
   .kdeg { font-size: 10px; }
 }
+
+
+/* ── Pitch-class space ── */
+.stack { display: flex; flex-direction: column; gap: 56px; min-width: 0; }
+.ps-facts { display: flex; flex-wrap: wrap; gap: 10px 32px; }
+.ps-fact { display: flex; flex-direction: column; gap: 2px; }
+.ps-fact .k { font-size: 11px; color: var(--muted); }
+.ps-fact .v { font-family: var(--serif); font-size: 21px; line-height: 1.15; }
+.ps-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px 32px; }
+.ps-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.bars { display: grid; gap: 4px; height: 150px; }
+.bars-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.bars-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.bar { display: flex; flex-direction: column; align-items: center; gap: 4px; border: none; background: transparent; padding: 0; color: var(--ink); min-width: 0; }
+.bar:disabled { cursor: default; }
+.bar-track { flex: 1; width: 100%; display: flex; align-items: flex-end; background: var(--line-2); border-radius: 2px 2px 0 0; overflow: hidden; }
+.bar-fill { width: 100%; background: var(--key-line); transition: height .3s ease; }
+.bar.present .bar-fill { background: var(--ink); }
+.bar.chosen .bar-fill { background: var(--accent); }
+.bar:not(:disabled):hover .bar-track { outline: 2px solid var(--accent); outline-offset: 1px; }
+.bar-label { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bar.present .bar-label, .bar.chosen .bar-label { color: var(--ink); }
+.bar-count { font-size: 11px; font-variant-numeric: tabular-nums; }
+
+.readings + .ps-chart .bars { height: 200px; }

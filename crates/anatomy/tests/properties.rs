@@ -37,7 +37,10 @@ proptest! {
         // transpositions. Compare it only when it is unique.
         if a.readings[0].score - a.readings[1].score > 1e-9 {
             prop_assert_eq!(b.best().root, a.best().root + k);
-            let words = |x: &Analysis| x.tags.iter().map(|t| t.word).collect::<Vec<_>>();
+            // Register words (airy, muddy) legitimately change with transposition.
+            let words = |x: &Analysis| {
+                x.tags.iter().map(|t| t.word).filter(|w| !matches!(*w, "airy" | "muddy")).collect::<Vec<_>>()
+            };
             prop_assert_eq!(words(&a), words(&b));
         }
     }

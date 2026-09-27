@@ -300,7 +300,8 @@ pub(crate) fn tags(
         );
     }
 
-    let plain = best.alterations == 0 && best.perfect_fifth;
+    // Lahdelma & Eerola tested plain seventh chords: four pitch classes, no extensions.
+    let plain = best.alterations == 0 && best.perfect_fifth && rel.len() == 4;
     let m7 = best.third == Third::Minor && best.seventh == Some(Seventh::Dominant);
     let maj7 = best.third == Third::Major && best.seventh == Some(Seventh::Major);
     if plain && (m7 || maj7) {
@@ -340,37 +341,126 @@ pub(crate) fn tags(
     }
 
     let et = opts.tuning == Tuning::Et;
-    if p.bass_cycles <= 6 {
-        let why = if et {
-            let worst = p.cents.iter().fold(0.0f64, |m, c| m.max(c.abs()));
+    let approx = if et { "approximate " } else { "are " };
+    let worst = p.cents.iter().fold(0.0f64, |m, c| m.max(c.abs()));
+    let detune = if et && worst >= 1.0 {
+        format!(" (12-TET detunes them by up to {worst:.0}¢)")
+    } else {
+        String::new()
+    };
+    let h = p.harmonics_text(":");
+    let pcs = rel.len();
+    // Periodicity ladder: how quickly the notes' common period comes round, in bass cycles.
+    match p.bass_cycles {
+        1 if pcs == 1 => push("doubled", 0.5, "Only octave doublings of one pitch class: every partial of the upper notes is already a partial of the bass.".into()),
+        1 => push(
+            "overtone",
+            0.5,
+            format!("The upper notes {approx}harmonics {h} of the bass itself: they lie on its own overtone series."),
+        ),
+        2 | 3 if pcs == 2 => push(
+            "hollow",
+            0.55,
+            format!("A bare {} with nothing between: the notes {approx}harmonics {h} of one fundamental, the plainest relation after the octave.", if p.bass_cycles == 2 { "fifth" } else { "fourth" }),
+        ),
+        2..=4 => push(
+            "fused",
+            0.5,
+            format!("The notes {approx}harmonics {h} of one fundamental{detune}: the period is so short they merge into a single tone-colour."),
+        ),
+        5..=8 => push(
+            "blended",
+            0.45,
+            format!("Harmonics {h} of one fundamental{detune}: a short common period, so the notes blend while staying distinct."),
+        ),
+        40..=119 => push(
+            "cloudy",
+            0.5,
+            if et {
+                format!("Long common period: even the just approximation needs {} bass cycles to repeat, and in 12-TET the summed wave never repeats exactly.", p.bass_cycles)
+            } else {
+                format!("Long common period ({} bass cycles): the summed wave takes a long time to repeat.", p.bass_cycles)
+            },
+        ),
+        c if c >= 120 => push(
+            "diffuse",
+            0.55,
+            format!("A common period of {c} bass cycles: no audible shared fundamental, the notes are heard as separate strands rather than one sonority."),
+        ),
+        _ => {}
+    }
+    // Where the harmonic series points: the chord's own root, or elsewhere.
+    if pcs >= 3 && (2..=24).contains(&p.bass_cycles) {
+        let below = 12.0 * (p.bass_cycles as f64).log2();
+        let fundamental = harmony::PitchClass::new(v.notes[0] as i32 - below.round() as i32);
+        let name = best.tone_names[best.root.up_to(fundamental) as usize]
+            .clone()
+            .unwrap_or_else(|| opts.spelling.pc_name(fundamental).to_string());
+        let octaves = (below / 12.0).round() as i32;
+        if fundamental == best.root && best.root_present {
+            push(
+                "grounded",
+                0.42,
+                format!("The notes {approx}harmonics {h} of {name}, {octaves} octave{} below the bass: the harmonic series confirms the named root.", if octaves == 1 { "" } else { "s" }),
+            );
+        } else if fundamental != best.root {
+            push(
+                "offset",
+                0.45,
+                format!("The notes {approx}harmonics {h} of {name}, not of the named root {}: the harmonic series points elsewhere.", nm(0)),
+            );
+        }
+    }
+    // Register and spacing.
+    let span = v.notes[n - 1] - v.notes[0];
+    if let Some((i, j)) = (0..n.saturating_sub(1))
+        .map(|i| (i, i + 1))
+        .find(|&(i, j)| v.notes[j] - v.notes[i] <= 4 && v.notes[i] < 48)
+    {
+        push(
+            "muddy",
+            0.78,
             format!(
-                "Low periodicity: the notes approximate harmonics {} of one fundamental (12-TET is off by up to {worst:.0}¢), close enough to blend into one tone-colour.",
-                p.harmonics_text(":")
-            )
-        } else {
-            format!(
-                "Low periodicity: the notes are harmonics {} of one fundamental, heard almost as one tone-colour.",
-                p.harmonics_text(":")
-            )
-        };
-        push("fused", 0.5, why);
-    } else if p.bass_cycles >= 40 {
-        let why = if et {
-            format!(
-                "Long common period: even the just approximation needs {} bass cycles to repeat, and in 12-TET the summed wave never repeats exactly.",
-                p.bass_cycles
-            )
-        } else {
-            format!(
-                "Long common period ({} bass cycles): the summed wave takes a long time to repeat.",
-                p.bass_cycles
-            )
-        };
-        push("cloudy", 0.5, why);
+                "{}–{} is a {} below C3, under the low-interval limit: their partials crowd into the same critical bands.",
+                v.names[i],
+                v.names[j],
+                interval_name(v.notes[j] - v.notes[i])
+            ),
+        );
+    }
+    if n >= 3 && span <= 12 && adj.iter().all(|&d| d <= 4) {
+        push("close", 0.35, "Close position: every note within an octave, adjacent notes a third or less apart, so the sound is compact.".into());
+    } else if n >= 3 && span >= 24 && adj.iter().any(|&d| d >= 10) {
+        push(
+            "spread",
+            0.35,
+            format!("Spans {:.1} octaves with gaps of up to {} semitones: each note stands apart in its own register.", span as f64 / 12.0, adj.iter().max().copied().unwrap_or(0)),
+        );
+    }
+    let mean = v.notes.iter().map(|&m| m as f64).sum::<f64>() / n as f64;
+    if v.notes[0] >= 67 {
+        push("airy", 0.35, format!("Everything sits above G4 (mean pitch {}), where partials thin out and chords sound light.", harmony::Midi(mean.round() as u8).name(opts.spelling)));
     }
 
     // A plain triad's colour, only when nothing more specific was said.
-    let quiet = tags.iter().all(|t| t.word == "unsettled");
+    // Texture and spacing words don't count; harmonic-character words do.
+    const TEXTURE: [&str; 14] = [
+        "unsettled",
+        "doubled",
+        "overtone",
+        "hollow",
+        "fused",
+        "blended",
+        "cloudy",
+        "diffuse",
+        "grounded",
+        "offset",
+        "muddy",
+        "close",
+        "spread",
+        "airy",
+    ];
+    let quiet = tags.iter().all(|t| TEXTURE.contains(&t.word));
     let fifth = if et { "perfect 5th" } else { "pure 5th" };
     if quiet && best.perfect_fifth && matches!(best.third, Third::Major | Third::Minor) {
         let major = best.third == Third::Major;
@@ -397,7 +487,7 @@ pub(crate) fn tags(
         tags.push(Tag {
             notes: Vec::new(),
             word,
-            weight: 0.4,
+            weight: 0.48,
             why,
         });
     }

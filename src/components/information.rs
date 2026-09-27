@@ -61,7 +61,7 @@ pub fn Information() -> Element {
     ];
     rsx! {
         section { class: "wave-section",
-            SectionHead { num: "06", title: "Information", hint: "entropy and complexity, in bits".to_string() }
+            SectionHead { num: "07", title: "Information", hint: "entropy and complexity, in bits".to_string() }
             div { class: "info",
                 div { class: "info-score",
                     span { class: "k", "Complexity" }
