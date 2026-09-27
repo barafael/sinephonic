@@ -251,17 +251,18 @@ button { font: inherit; cursor: pointer; }
 .black-key .klabel { font-size: 8px; color: #fff; padding-bottom: 4px; letter-spacing: -.02em; white-space: nowrap; }
 
 /* Pitch-class clocks */
-.identity-row { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
-.identity-row .identity { flex: 1 1 200px; }
-.clock { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.clock figcaption { font-size: 10px; color: var(--muted); }
-.clock-ring { fill: none; stroke: var(--line); }
-.clock-poly { fill: color-mix(in oklch, var(--accent) 12%, transparent); stroke: var(--accent); stroke-width: 1.2; }
+.identity-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; align-items: start; }
+.identity-row .identity { grid-column: 1 / -1; }
+.clock { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.clock svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.clock figcaption { font-size: 12px; color: var(--muted); }
+.clock-ring { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.clock-poly { fill: color-mix(in oklch, var(--accent) 12%, transparent); stroke: var(--accent); stroke-width: 2; }
 .clock-label { font-family: var(--mono); font-size: 9px; fill: var(--muted-2); }
 .clock-label.on { fill: var(--ink); font-weight: 500; }
 .clock-dot { fill: var(--ink); }
 .clock-dot.root { fill: var(--accent); }
-.clock-bass { fill: none; stroke: var(--ink); stroke-width: 1; }
+.clock-bass { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .midi-status { font-size: 12px; color: var(--muted); padding: 6px 4px; }
 
 /* Harmonic entropy overlay */
@@ -293,4 +294,4 @@ button { font: inherit; cursor: pointer; }
 .curve-plot .base { stroke: var(--line); }
 .legend .swatch { width: 22px; height: 0; border-top: 2px solid var(--ink); display: inline-block; }
 .legend .swatch.dashed { border-top: 2px dashed var(--accent); margin-left: 12px; }
-.clock-label { font-size: 11px; }
+.clock-label { font-size: 15px; }

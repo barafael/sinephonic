@@ -13,9 +13,10 @@ pub fn PcClock(
     title: &'static str,
     spelling: Spelling,
 ) -> Element {
-    let size = 190.0;
+    // viewBox units; the SVG scales to its column (see .clock svg in main.css).
+    let size = 260.0;
     let c = size / 2.0;
-    let r = 62.0;
+    let r = 88.0;
     let pos = |pc: u8| {
         // Position of pc on the circle: index k with k·step ≡ pc (mod 12); 7 is its own inverse.
         let k = (pc as u32 * step as u32 % 12) as f64;
@@ -37,8 +38,8 @@ pub fn PcClock(
             let k = (pc as u32 * step as u32 % 12) as f64;
             let a = k / 12.0 * std::f64::consts::TAU - std::f64::consts::FRAC_PI_2;
             (
-                c + (r + 16.0) * a.cos(),
-                c + (r + 16.0) * a.sin() + 3.5,
+                c + (r + 24.0) * a.cos(),
+                c + (r + 24.0) * a.sin() + 5.0,
                 spelling.pc_name(PitchClass::new(pc as i32)).to_string(),
                 pcs.contains(&pc),
             )
@@ -53,7 +54,7 @@ pub fn PcClock(
         .collect();
     rsx! {
         figure { class: "clock",
-            svg { view_box: "0 0 {size} {size}", width: "{size}", height: "{size}",
+            svg { view_box: "0 0 {size} {size}",
                 circle { class: "clock-ring", cx: "{c}", cy: "{c}", r: "{r}" }
                 if pcs.len() > 1 {
                     polygon { class: "clock-poly", points: "{poly}" }
@@ -63,9 +64,9 @@ pub fn PcClock(
                 }
                 for (x, y, is_root, is_bass) in dots {
                     if is_bass {
-                        circle { class: "clock-bass", cx: "{x}", cy: "{y}", r: "9" }
+                        circle { class: "clock-bass", cx: "{x}", cy: "{y}", r: "13" }
                     }
-                    circle { class: if is_root { "clock-dot root" } else { "clock-dot" }, cx: "{x}", cy: "{y}", r: "5.5" }
+                    circle { class: if is_root { "clock-dot root" } else { "clock-dot" }, cx: "{x}", cy: "{y}", r: "8" }
                 }
             }
             figcaption { "{title}" }
